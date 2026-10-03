@@ -30,7 +30,7 @@ internal static partial class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        output = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v1.0.0"));
+        output = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v1.1.0"));
         Directory.CreateDirectory(output);
         Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", Path.Combine(output, "test-data"));
         app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };

@@ -1,10 +1,10 @@
 # Anywhere Translator
 
-Windows 桌面划词翻译工具，当前版本为 1.0.0。
+Windows 桌面划词翻译工具，当前版本为 1.1.0。
 
 鼠标拖选或双击文字后，在选区旁显示按钮。点击按钮打开翻译窗口，并通过用户配置的 AI API 返回译文。程序独立运行，无需浏览器扩展。
 
-[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [v1.0.0 发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
+[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [v1.1.0 发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
 
 <img src="screenshots/appearance.png" alt="浅色外观设置" width="360" />
 
@@ -12,9 +12,9 @@ Windows 桌面划词翻译工具，当前版本为 1.0.0。
 
 ## 下载与运行
 
-运行环境为 Windows x64，并需安装 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) 的 Windows x64 版本。请选择 Desktop Runtime，普通 .NET Runtime 不包含 WPF 所需组件。
+运行环境为 Windows x64。正式发布的完整便携版已内置 .NET 10 Desktop Runtime，解压即可运行，无需另外安装 .NET。
 
-在 [Releases](https://github.com/gitkukara/anywhere-translator/releases) 下载 `TranslatorAnywhere-v1.0.0-win-x64.zip`，完整解压到可写入的目录，然后运行 `TranslatorAnywhere.exe`。EXE、DLL、JSON 和随附文档应保存在一起。程序使用便携目录保存配置，首次运行需自行配置 API 服务和密钥。
+在 [Releases](https://github.com/gitkukara/anywhere-translator/releases) 下载 `TranslatorAnywhere-v1.1.0-win-x64.zip`，完整解压到可写入的目录，然后运行 `TranslatorAnywhere.exe`。EXE、DLL、JSON 和随附文档应保存在一起。程序使用便携目录保存配置，首次运行需自行配置 API 服务和密钥。
 
 GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开发步骤见下方“开发与构建”。
 
@@ -137,15 +137,15 @@ dotnet run --project tests/TranslatorAnywhere.UiChecks/TranslatorAnywhere.UiChec
 .\scripts\run.ps1
 ```
 
-默认打包输出为 `dist/win-x64/` 和版本 ZIP，运行时依赖已安装的 .NET 10 Desktop Runtime。`scripts/build.ps1 -SelfContained` 可生成包含 .NET 运行时的版本，首次可能需要联网下载微软运行时组件。
+默认打包输出为 `dist/win-x64/` 和版本 ZIP，包含 .NET 运行时、WPF 及语言资源。首次构建可能需要联网下载微软运行时组件。`scripts/build.ps1 -FrameworkDependent` 可选生成依赖本机 .NET 的轻量版，其输出目录和 ZIP 名称带 `-framework-dependent`，不会与完整版混用。`-SkipDeploy` 只生成发布包，不覆盖本地运行目录。
 
 ## 已完成的验证
 
 - Release 构建与 Windows 发布版本生成。
 - 307 项本地服务检查：DPAPI 加密、主题偏好保存与旧配置兼容、旧版配置与颜色透明度迁移、固定目标语言、独立密钥与保存失败回滚、模型发现、OpenAI／Anthropic 请求和流式响应、取消、错误信息、图标验证及不同 DPI 位置计算。其中 64 项启动检查覆盖快捷方式参数、工作目录、旧登记迁移、Windows 禁用与未知状态，以及隔离目录中的真实 COM 快捷方式读写；自动测试不操作真实启动文件夹或注册表。
-- 134 项界面模拟检查覆盖外部点击收起、钉住保留、收起时取消翻译、主题实时切换、模拟系统主题通知、手动模式优先级、深色文本对比度、主题保存恢复、窄窗口布局、预览纵向滚动、最小尺寸下各页控件可达与长地址／模型编辑、统一矢量图标与无障碍名称、复制成功反馈及计时恢复、无原文展示、返回导航、六位颜色与旧颜色兼容、透明度实时预览与保存恢复、实际按钮悬停透明度、固定语言选项、供应商切换、自动保存防抖、关闭前保存、未修改或恢复原值不写入、非法输入与写入失败、密钥清除、模型选择与手输、取消过期请求及图标加载。截图生成到 `artifacts/ui-v1.0.0/`，包含语言下拉框展开状态及深色设置、供应商、翻译窗口和原生标题栏；测试使用模拟服务和独立目录，不读取用户配置或密钥。
+- 134 项界面模拟检查覆盖外部点击收起、钉住保留、收起时取消翻译、主题实时切换、模拟系统主题通知、手动模式优先级、深色文本对比度、主题保存恢复、窄窗口布局、预览纵向滚动、最小尺寸下各页控件可达与长地址／模型编辑、统一矢量图标与无障碍名称、复制成功反馈及计时恢复、无原文展示、返回导航、六位颜色与旧颜色兼容、透明度实时预览与保存恢复、实际按钮悬停透明度、固定语言选项、供应商切换、自动保存防抖、关闭前保存、未修改或恢复原值不写入、非法输入与写入失败、密钥清除、模型选择与手输、取消过期请求及图标加载。截图生成到 `artifacts/ui-v1.1.0/`，包含语言下拉框展开状态及深色设置、供应商、翻译窗口和原生标题栏；测试使用模拟服务和独立目录，不读取用户配置或密钥。
 - 新版实际窗口已检查三项导航、7 项供应商目录、详情入口、模型刷新与连接测试反馈；网络操作使用本地模拟服务。
-- 1.0.0 已实际创建当前用户启动快捷方式，Windows 启动项枚举能够识别，旧 Run 登记已移除。已执行该快捷方式并确认单个 `--background` 进程完成启动，未弹出设置窗口。尚未通过重启或重新登录 Windows 验证登录触发。
+- 1.1.0 已实际创建当前用户启动快捷方式，Windows 启动项枚举能够识别，旧 Run 登记已移除。已执行该快捷方式并确认单个 `--background` 进程完成启动，未弹出设置窗口。尚未通过重启或重新登录 Windows 验证登录触发。
 - 第一版实际桌面测试：在独立 WPF 进程拖选文字后，按钮出现在选区旁，原选区保留。
 
 未使用真实 API Key 请求外部服务。Word、微信、各类 PDF 阅读器、混合 DPI 多屏和剪贴板降级的兼容情况仍需逐个实测，不能视为已验证。

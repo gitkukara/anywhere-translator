@@ -2,7 +2,7 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-[下载 v1.0.0](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.0.0) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
+[下载 v1.1.0](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.0) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
 <img src="docs/screenshots/appearance.png" alt="浅色外观设置" width="360" />
 
@@ -15,7 +15,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 ## 使用
 
-1. 安装 [.NET 10 Desktop Runtime（Windows x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)，解压下载包，运行 `TranslatorAnywhere.exe`。
+1. 下载 Windows x64 便携版，完整解压后运行 `TranslatorAnywhere.exe`。已内置 .NET 运行时，无需另外安装。
 2. 在“翻译服务”添加供应商，填写 API Key，刷新并选择模型，测试连接后设为当前服务。
 3. 在其他应用中拖选文字，点击选区附近出现的按钮，弹出浮窗显示翻译；也可选中文字后按 `Ctrl+Alt+T`。
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。

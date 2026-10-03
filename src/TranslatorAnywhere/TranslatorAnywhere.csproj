@@ -9,8 +9,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets/app.ico</ApplicationIcon>
     <AssemblyName>TranslatorAnywhere</AssemblyName>
+    <AssemblyTitle>Anywhere Translator</AssemblyTitle>
+    <Product>Anywhere Translator</Product>
     <RootNamespace>TranslatorAnywhere</RootNamespace>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <!-- WPF owns PerMonitorV2 awareness; WinForms is used only for the tray icon. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
@@ -20,4 +22,8 @@
     <None Include="../../RELEASE_NOTES.md" Link="RELEASE_NOTES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Include="../../THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- Keep the managed assembly identity stable for WPF resource URIs. -->
+  <Target Name="RenamePublishedAppHost" AfterTargets="Publish" Condition="'$(UseAppHost)' == 'true'">
+    <Move SourceFiles="$(PublishDir)TranslatorAnywhere.exe" DestinationFiles="$(PublishDir)Anywhere Translator.exe" Condition="Exists('$(PublishDir)TranslatorAnywhere.exe')" />
+  </Target>
 </Project>

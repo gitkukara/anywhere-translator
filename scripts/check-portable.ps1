@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$Archive)
+﻿param([Parameter(Mandatory=$true)][string]$Archive)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
 $taskExtract = Join-Path $taskRoot ('artifacts\portable-check\' + [guid]::NewGuid().ToString('N'))
@@ -26,7 +26,7 @@ try {
     [Environment]::SetEnvironmentVariable('DOTNET_ROOT_X64',$taskEmpty,'Process')
     [Environment]::SetEnvironmentVariable('DOTNET_MULTILEVEL_LOOKUP','0','Process')
     [Environment]::SetEnvironmentVariable('TRANSLATOR_ANYWHERE_DATA_DIR',(Join-Path $taskExtract 'isolated-test-data'),'Process')
-    $taskProcess = Start-Process -FilePath (Join-Path $taskExtract 'TranslatorAnywhere.exe') -ArgumentList '--fixture' -WorkingDirectory $taskExtract -WindowStyle Hidden -PassThru
+    $taskProcess = Start-Process -FilePath (Join-Path $taskExtract 'Anywhere Translator.exe') -ArgumentList '--fixture' -WorkingDirectory $taskExtract -WindowStyle Hidden -PassThru
     $taskDeadline = [DateTime]::UtcNow.AddSeconds(20)
     do {
         Start-Sleep -Milliseconds 250

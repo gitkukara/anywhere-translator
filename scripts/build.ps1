@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$FrameworkDependent,
     [switch]$SelfContained,
     [switch]$SkipDeploy
@@ -12,7 +12,7 @@ $taskVersion = [string]$taskProjectXml.Project.PropertyGroup.Version
 if ($taskVersion -notmatch '^\d+\.\d+\.\d+(?:[-.][A-Za-z0-9.-]+)?$') { throw '项目版本号无效。' }
 $taskSuffix = if ($FrameworkDependent) { '-framework-dependent' } else { '' }
 $taskOutput = Join-Path $taskRoot ('dist\win-x64' + $taskSuffix)
-$taskArchive = Join-Path $taskRoot "dist\TranslatorAnywhere-v$taskVersion-win-x64$taskSuffix.zip"
+$taskArchive = Join-Path $taskRoot "dist\Anywhere-Translator-v$taskVersion-win-x64$taskSuffix.zip"
 # Always publish into an empty staging directory. User data and stale runtime files
 # from a previous build must never enter a release archive.
 $taskStage = Join-Path $taskRoot ('artifacts\publish\' + [guid]::NewGuid().ToString('N'))
@@ -40,7 +40,7 @@ $taskHash = (Get-FileHash -LiteralPath $taskArchive -Algorithm SHA256).Hash.ToLo
 if (-not $SkipDeploy) {
     New-Item -ItemType Directory -Path $taskOutput -Force | Out-Null
     foreach ($taskFile in $taskFiles) { Copy-Item -LiteralPath $taskFile -Destination $taskOutput -Recurse -Force }
-    Write-Output "程序已生成：$taskOutput\TranslatorAnywhere.exe"
+    Write-Output "程序已生成：$taskOutput\Anywhere Translator.exe"
 }
 Write-Output "暂存目录：$taskStage"
 Write-Output "压缩包已生成：$taskArchive"

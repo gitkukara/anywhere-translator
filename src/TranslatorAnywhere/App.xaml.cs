@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -68,6 +68,7 @@ public partial class App : Application
                 MessageBox.Show("划词翻译已经在运行，请从任务栏托盘打开设置。", "Anywhere Translator");
             Shutdown(); return;
         }
+        StartMenuRegistration.EnsureCurrentExecutable();
         _store = new SettingsStore();
         _settings = _store.Load();
         _theme = new ThemeService(this);

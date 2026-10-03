@@ -1,3 +1,5 @@
+<p align="center"><img src="src/TranslatorAnywhere/Assets/app-256.png" alt="Anywhere Translator 图标" width="96" height="96" /></p>
+
 # Anywhere Translator
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文，无需浏览器插件。

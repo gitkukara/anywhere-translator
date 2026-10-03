@@ -22,6 +22,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 **使用演示（视频由AI制作，实际体验更丝滑）：**
 [![15 秒操作示意，使用模拟译文](docs/demo/usage.gif)](https://github.com/gitkukara/anywhere-translator/releases/download/v1.0.0/Anywhere-Translator-demo.mp4)
+
 ## 更新
 
 目前需要手动更新。已有版本的用户按以下步骤操作，首次安装直接看上方“使用”即可。

@@ -1,0 +1,154 @@
+<UserControl x:Class="TranslatorAnywhere.Views.ProviderSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:views="clr-namespace:TranslatorAnywhere.Views"
+             FontFamily="Segoe UI Variable, Microsoft YaHei UI, Segoe UI" FontSize="13"
+             Foreground="{DynamicResource InkBrush}"
+             Unloaded="Control_Unloaded">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme.xaml" />
+                <ResourceDictionary Source="ProviderIcons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="ProviderFieldLabel" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Center" /><Setter Property="TextAlignment" Value="Left" /><Setter Property="Margin" Value="0,0,12,0" /><Setter Property="TextWrapping" Value="NoWrap" />
+            </Style>
+            <Style x:Key="ProviderFieldRow" TargetType="Grid">
+                <Setter Property="Margin" Value="0,0,0,9" /><Setter Property="MinHeight" Value="28" />
+            </Style>
+            <Style x:Key="ProviderRowButton" TargetType="Button" BasedOn="{StaticResource SubtleButton}">
+                <Setter Property="Padding" Value="0" /><Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{StaticResource BackgroundBrush}" /></Trigger></ControlTemplate.Triggers>
+                </ControlTemplate></Setter.Value></Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+        <Grid x:Name="ListView">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="服务供应商" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <Button x:Name="AddProviderButton" Grid.Column="1" Style="{StaticResource SubtleButton}" Click="AddProvider_Click" AutomationProperties.Name="添加服务">
+                    <StackPanel Orientation="Horizontal">
+                        <views:HugeIcon Kind="Add" Width="16" Height="16" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" VerticalAlignment="Center" Margin="0,0,6,0" IsHitTestVisible="False" />
+                        <TextBlock Text="添加服务" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+            <ScrollViewer Grid.Row="1" Style="{StaticResource SettingsScrollViewer}">
+                <Border x:Name="ProviderListBorder" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="9" VerticalAlignment="Top">
+                    <StackPanel x:Name="ProviderListPanel" />
+                </Border>
+            </ScrollViewer>
+            <StackPanel x:Name="EmptyProvidersPanel" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed">
+                <TextBlock Text="还没有翻译服务" Foreground="{StaticResource MutedBrush}" />
+                <Button Content="添加服务" Style="{StaticResource SubtleButton}" Click="AddProvider_Click" Margin="0,10,0,0" />
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="CatalogView" Visibility="Collapsed">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+            <Button x:Name="CatalogBackButton" Margin="0,0,0,12" Style="{StaticResource ProviderRowButton}" Foreground="{StaticResource InkBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" HorizontalContentAlignment="Left" Padding="0" MinHeight="32" Click="BackToList_Click" ToolTip="返回服务列表">
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="20" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <Grid Width="20" Height="24" VerticalAlignment="Center"><views:HugeIcon Kind="ChevronLeft" Width="18" Height="18" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" /></Grid>
+                    <TextBlock Grid.Column="1" Text="添加翻译服务" Foreground="{StaticResource InkBrush}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+            </Button>
+            <Grid Grid.Row="1" Margin="0,0,0,12">
+                <TextBox x:Name="CatalogSearchBox" TextAlignment="Center" ToolTip="搜索名称、分类或 API 地址" TextChanged="CatalogSearch_Changed" />
+                <TextBlock Text="搜索服务供应商" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                    <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed" /><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=CatalogSearchBox}" Value=""><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                </TextBlock>
+            </Grid>
+            <ScrollViewer Grid.Row="2" Style="{StaticResource SettingsScrollViewer}">
+                <Grid VerticalAlignment="Top">
+                    <ItemsControl x:Name="CatalogItems" VerticalAlignment="Top" Margin="-4,0,-4,0">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate><DataTemplate>
+                            <Button Style="{StaticResource ProviderRowButton}" Click="Preset_Click" Tag="{Binding Id}" Margin="4,0,4,8" ToolTip="{Binding Name}">
+                                <Border Background="White" BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" CornerRadius="8" Padding="14,11" Height="75">
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="38" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <Grid VerticalAlignment="Center">
+                                            <Image Source="{Binding Icon}" Width="26" Height="26" />
+                                            <views:HugeIcon Kind="Settings" Width="26" Height="26" Foreground="{Binding Accent}" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                                                <views:HugeIcon.Style><Style TargetType="{x:Type views:HugeIcon}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers><DataTrigger Binding="{Binding Icon}" Value="{x:Null}"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
+                                                </Style></views:HugeIcon.Style>
+                                            </views:HugeIcon>
+                                        </Grid>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="{Binding Name}" Foreground="{StaticResource InkBrush}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" /><TextBlock Text="{Binding Description}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,5,0,0" TextTrimming="CharacterEllipsis" /></StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Button>
+                        </DataTemplate></ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock x:Name="CatalogEmptyLabel" Text="没有匹配的服务" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" Margin="0,24,0,0" Visibility="Collapsed" />
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+        <Grid x:Name="DetailView" Visibility="Collapsed">
+            <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <Button x:Name="DetailBackButton" Style="{StaticResource ProviderRowButton}" Foreground="{StaticResource InkBrush}" HorizontalAlignment="Left" VerticalAlignment="Center" HorizontalContentAlignment="Left" Padding="0" MinHeight="32" Click="DetailBack_Click" ToolTip="返回服务列表">
+                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="20" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Grid Width="20" Height="24" VerticalAlignment="Center"><views:HugeIcon Kind="ChevronLeft" Width="18" Height="18" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" /></Grid>
+                        <Image x:Name="DetailLogo" Grid.Column="1" Width="24" Height="24" Margin="6,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock x:Name="DetailTitle" Grid.Column="2" Foreground="{StaticResource InkBrush}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                    </Grid>
+                </Button>
+                <Button x:Name="UseProviderButton" Grid.Column="1" Content="设为当前服务" Style="{StaticResource SubtleButton}" Click="UseProvider_Click" Margin="8,0,0,0" />
+            </Grid>
+            <ScrollViewer Grid.Row="1" Style="{StaticResource SettingsScrollViewer}">
+                <Border Style="{StaticResource Card}" Padding="14" VerticalAlignment="Top">
+                    <StackPanel>
+                        <Grid Style="{StaticResource ProviderFieldRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="80" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="服务名称" Style="{StaticResource ProviderFieldLabel}" /><TextBox Grid.Column="1" x:Name="ProviderNameBox" Width="250" HorizontalAlignment="Right" TextAlignment="Center" MaxLength="80" TextChanged="Editor_TextChanged" /></Grid>
+                        <Grid Style="{StaticResource ProviderFieldRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="80" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="API 地址" Style="{StaticResource ProviderFieldLabel}" /><TextBox Grid.Column="1" x:Name="ProviderBaseUrlBox" Width="250" HorizontalAlignment="Right" TextAlignment="Center" TextChanged="Editor_TextChanged" /></Grid>
+                        <Grid x:Name="ProtocolRow" Style="{StaticResource ProviderFieldRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="80" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="API 类型" Style="{StaticResource ProviderFieldLabel}" /><ComboBox Grid.Column="1" x:Name="ProtocolBox" Width="160" HorizontalAlignment="Right" HorizontalContentAlignment="Center" ItemContainerStyle="{StaticResource CompactChoiceComboBoxItem}" SelectionChanged="Editor_Changed"><ComboBoxItem Content="OpenAI 兼容" /><ComboBoxItem Content="Anthropic" /></ComboBox></Grid>
+                        <Grid Style="{StaticResource ProviderFieldRow}" Margin="0,0,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="80" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="API Key" Style="{StaticResource ProviderFieldLabel}" /><PasswordBox Grid.Column="1" x:Name="ProviderApiKeyBox" Width="250" HorizontalAlignment="Right" HorizontalContentAlignment="Center" PasswordChanged="Editor_KeyChanged" ToolTip="密钥在本机加密保存。清空输入框可移除密钥。" /></Grid>
+                        <TextBlock x:Name="CredentialHint" Width="250" HorizontalAlignment="Right" Visibility="Collapsed" Style="{StaticResource Hint}" Margin="0,0,0,8" />
+                        <Grid Style="{StaticResource ProviderFieldRow}" Margin="0,0,0,5"><Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="80" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="翻译模型" Style="{StaticResource ProviderFieldLabel}" /><ComboBox Grid.Column="1" x:Name="SelectedModelCombo" Width="250" HorizontalAlignment="Right" HorizontalContentAlignment="Center" ItemContainerStyle="{StaticResource CompactChoiceComboBoxItem}" IsEditable="True" ToolTip="可直接填写模型名称" SelectionChanged="SelectedModel_SelectionChanged" LostKeyboardFocus="SelectedModel_LostFocus" />
+                        </Grid>
+                        <Grid Margin="0,0,0,8"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <Button x:Name="ModelListToggleButton" Style="{StaticResource SubtleButton}" HorizontalAlignment="Left" MinHeight="28" Padding="0,3" Click="ModelListToggle_Click" AutomationProperties.Name="{Binding Text, ElementName=ModelListToggleLabel}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="ModelListToggleLabel" Text="管理模型列表" VerticalAlignment="Center" />
+                                    <views:HugeIcon x:Name="ModelListToggleIcon" Kind="ChevronRight" Width="14" Height="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" VerticalAlignment="Center" Margin="6,0,0,0" IsHitTestVisible="False" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="RefreshModelsButton" Grid.Column="1" Content="刷新模型" Style="{StaticResource SubtleButton}" Click="RefreshModels_Click" />
+                        </Grid>
+                        <StackPanel x:Name="ModelListPanel" Width="250" HorizontalAlignment="Right" Visibility="Collapsed" Margin="0,0,0,8">
+                            <TextBox x:Name="ModelListBox" Height="66" TextAlignment="Center" AcceptsReturn="True" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" TextChanged="Models_TextChanged" />
+                            <TextBlock Text="每行一个模型，也可以刷新获取后再选择。" Style="{StaticResource Hint}" Margin="0,5,0,0" />
+                        </StackPanel>
+                        <Grid x:Name="ProviderThinkingRow" Margin="0,8,0,0" MinHeight="28"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="32" /></Grid.ColumnDefinitions>
+                            <TextBlock Text="关闭思考模式，快速返回译文" VerticalAlignment="Center" />
+                            <CheckBox x:Name="ProviderThinkingCheck" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="关闭思考模式，快速返回译文" Checked="Editor_Changed" Unchecked="Editor_Changed" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="14,8" Margin="0,8,0,0" VerticalAlignment="Top">
+                <StackPanel>
+                    <Grid MinHeight="28"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="32" /></Grid.ColumnDefinitions>
+                        <TextBlock Text="启用这个服务" VerticalAlignment="Center" />
+                        <CheckBox x:Name="ProviderEnabledCheck" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="启用这个服务" Checked="Editor_Changed" Unchecked="Editor_Changed" />
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Button x:Name="RemoveProviderButton" Content="移除服务" Style="{StaticResource SubtleButton}" Foreground="{StaticResource ErrorBrush}" Click="RemoveProvider_Click" Margin="0,0,6,0" />
+                        <Button x:Name="TestConnectionButton" Content="测试连接" Style="{StaticResource SubtleButton}" Click="TestConnection_Click" />
+                        <Button x:Name="CancelConnectionButton" Content="停止" Style="{StaticResource SubtleButton}" Click="CancelConnection_Click" Visibility="Collapsed" Margin="4,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+        <TextBlock x:Name="ProviderStatusLabel" Grid.Row="1" Visibility="Collapsed" Style="{StaticResource Hint}" Margin="0,10,0,0" MaxHeight="38" TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>

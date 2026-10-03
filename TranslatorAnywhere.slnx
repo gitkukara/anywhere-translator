@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/TranslatorAnywhere/TranslatorAnywhere.csproj" />
+  <Project Path="tests/TranslatorAnywhere.Tests/TranslatorAnywhere.Tests.csproj" />
+  <Project Path="tests/TranslatorAnywhere.UiChecks/TranslatorAnywhere.UiChecks.csproj" />
+</Solution>

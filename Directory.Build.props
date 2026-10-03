@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DebugType>portable</DebugType>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/TranslatorAnywhere/Models/AppSettings.cs" Link="Models/AppSettings.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Models/ProviderConfiguration.cs" Link="Models/ProviderConfiguration.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Models/ProviderPreset.cs" Link="Models/ProviderPreset.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Models/SelectionSnapshot.cs" Link="Models/SelectionSnapshot.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/ButtonPlacement.cs" Link="Services/ButtonPlacement.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/SettingsStore.cs" Link="Services/SettingsStore.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/ProviderRegistry.cs" Link="Services/ProviderRegistry.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/TranslationService.cs" Link="Services/TranslationService.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/ProviderConnectionService.cs" Link="Services/ProviderConnectionService.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/DiagnosticLog.cs" Link="Services/DiagnosticLog.cs" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/StartupRegistration.cs" Link="Services/StartupRegistration.cs" />
+  </ItemGroup>
+</Project>

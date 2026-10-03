@@ -1,0 +1,70 @@
+{
+  "Package": "@hugeicons/core-free-icons",
+  "Version": "4.3.5",
+  "Source": "https://registry.npmjs.org/@hugeicons/core-free-icons/-/core-free-icons-4.3.5.tgz",
+  "Style": "Stroke Rounded",
+  "Grid": 24,
+  "StrokeWidth": 1.5,
+  "Icons": [
+    {
+      "Kind": "Translate",
+      "Source": "TranslationIcon",
+      "SourceSha256": "03DAE93F91B7F8B7F55EE22FE34926AA578D13D38EC88AEADB7B8F6406DAB30F"
+    },
+    {
+      "Kind": "Pin",
+      "Source": "Pin02Icon",
+      "SourceSha256": "2BD0121CF9F7FE42B8BEECD2ADFC423DE512F452C62330E148FADBEFC6B9FAFC"
+    },
+    {
+      "Kind": "Settings",
+      "Source": "Settings01Icon",
+      "SourceSha256": "2A786ADFC5785D70757A7D86FAEA37BA6D731E159668B57736113A829EB2901F"
+    },
+    {
+      "Kind": "Close",
+      "Source": "Cancel01Icon",
+      "SourceSha256": "B370872EDAE0E589754BE184C5A039F7F9B0EED78D53E0D91BBFDF3948BB9E7D"
+    },
+    {
+      "Kind": "Refresh",
+      "Source": "Refresh01Icon",
+      "SourceSha256": "2F73D63014D96EC7E9F508686D8CB8811EDDC07BB2F489ACD51DE6D82E3602C2"
+    },
+    {
+      "Kind": "Stop",
+      "Source": "StopIcon",
+      "SourceSha256": "3788C06BC5904E22FA89104F41FB4FA047A8600292E6AD5C3E6B31832217424D"
+    },
+    {
+      "Kind": "Copy",
+      "Source": "Copy01Icon",
+      "SourceSha256": "ED11600EE909DF5C275465CE6C80236843F3AD8C3287C2017BF4B849386D375A"
+    },
+    {
+      "Kind": "Check",
+      "Source": "Tick02Icon",
+      "SourceSha256": "400664E4740D9D87A586B697ED4CE48C1198A2F3C6F226F538CF898B2E1E2235"
+    },
+    {
+      "Kind": "ChevronDown",
+      "Source": "ArrowDown01Icon",
+      "SourceSha256": "3E880DDFD6491DF41CA3E7261B7862C4224D99A10AAA52A832156D3B0F50FCB8"
+    },
+    {
+      "Kind": "ChevronLeft",
+      "Source": "ArrowLeft01Icon",
+      "SourceSha256": "7FE0F420F68E9D8B94753A3A917F5CC4286281FE5F2AE7D7FC1B9C3BB7E9206E"
+    },
+    {
+      "Kind": "ChevronRight",
+      "Source": "ArrowRight01Icon",
+      "SourceSha256": "8929116230C031A6A4E756486528D31F8B8B495AE5B94E885FA3434D6A2709E8"
+    },
+    {
+      "Kind": "Add",
+      "Source": "Add01Icon",
+      "SourceSha256": "A47E07280EC7B20F458DCA2D1AA8790C46BC52B65FE522B5DF4C71F5F6B135F3"
+    }
+  ]
+}

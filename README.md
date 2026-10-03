@@ -1,4 +1,4 @@
-<h1><img src="src/TranslatorAnywhere/Assets/app-256.png" alt="" width="32" height="32" align="absmiddle" /> Anywhere Translator</h1>
+<h1><img src="src/TranslatorAnywhere/Assets/app-256.png" alt="" width="36" height="36" align="absmiddle" /> Anywhere Translator</h1>
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
@@ -15,7 +15,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 ## 使用
 
-1. 下载 Windows x64 便携版，完整解压后运行 `TranslatorAnywhere.exe`。已内置 .NET 运行时，无需另外安装。
+1. 下载 Windows x64 便携版，完整解压后运行 `TranslatorAnywhere.exe`。
 2. 在“翻译服务”添加供应商，填写 API Key，刷新并选择模型，测试连接后设为当前服务。
 3. 在其他应用中拖选文字，点击选区附近出现的按钮，弹出浮窗显示翻译；也可选中文字后按 `Ctrl+Alt+T`。
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。

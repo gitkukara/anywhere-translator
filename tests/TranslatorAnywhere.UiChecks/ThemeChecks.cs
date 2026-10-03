@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -120,6 +120,7 @@ internal static partial class Program
             theme.Apply(AppTheme.Light);
             await LayoutAsync(window);
             Check(labels.All(label => ThemeColor(label.Foreground) == ThemeResource("InkBrush")), "Existing provider labels update when returning to light mode");
+            Save(window, "theme-light-provider-detail.png");
             tabs.SelectedIndex = 2;
             choice.SelectedIndex = 1;
             Check(window.FlushPendingChanges(), "Explicit light theme is saved");

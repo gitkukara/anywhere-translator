@@ -1,6 +1,6 @@
-# v0.3.9
+# v1.0.0
 
-本次更新完善设置界面、明暗主题和翻译浮窗交互，并增加国内供应商快捷配置。
+Anywhere Translator v1.0.0 正式版。包含此前确认的界面、主题、供应商和翻译浮窗改进，并精简首页说明、新增 15 秒使用演示。
 
 ## 更新内容
 
@@ -14,7 +14,7 @@
 
 ## 下载与升级
 
-下载 `TranslatorAnywhere-v0.3.9-win-x64.zip`，需要 Windows x64 和 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。
+下载 `TranslatorAnywhere-v1.0.0-win-x64.zip`，需要 Windows x64 和 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。
 
 从托盘退出旧程序，再将压缩包内容覆盖到原目录，保留 `data/` 目录即可继续使用原配置和密钥。若旧的 `data/app.ico` 存在，它会覆盖新版窗口和托盘图标；想使用新版内置图标，可将此文件改名备份。首次使用需自行填写 API Key、刷新或手动指定模型，并测试连接。
 

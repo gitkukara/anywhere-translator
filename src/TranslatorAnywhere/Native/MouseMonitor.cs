@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using TranslatorAnywhere.Models;
+using TranslatorAnywhere.Services;
 
 namespace TranslatorAnywhere.Native;
 
@@ -122,6 +123,8 @@ public sealed class MouseMonitor : IDisposable
                     if (down is not { } start) continue;
                     down = null;
                     bool dragged = Math.Abs(item.Point.X - start.Point.X) >= dragWidth || Math.Abs(item.Point.Y - start.Point.Y) >= dragHeight;
+                    if (dragged || doubleClick)
+                        DiagnosticLog.Write($"Gesture: drag completed; sameWindow={start.Foreground == item.Foreground}; ownPointer={ownPointer}");
                     if ((dragged || doubleClick) && start.Foreground != IntPtr.Zero && start.Foreground == item.Foreground && !ownPointer)
                         SelectionFinished?.Invoke(new SelectionGesture(start.Foreground, start.Point, item.Point, doubleClick));
                 }

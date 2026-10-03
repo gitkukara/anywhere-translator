@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +13,7 @@ using System.Windows.Automation.Text;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using TranslatorAnywhere.Models;
+using TranslatorAnywhere.Services;
 
 namespace TranslatorAnywhere.Native;
 
@@ -45,9 +46,9 @@ public sealed class SelectionCapture : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         token.ThrowIfCancellationRequested();
-        if (!HasSourceFocus(gesture) || DesktopInterop.IsOwnWindow(gesture.SourceWindow)) return null;
+        if (!HasSourceFocus(gesture) || DesktopInterop.IsOwnWindow(gesture.SourceWindow)) { DiagnosticLog.Write("Capture: source focus changed before capture"); return null; }
         IntPtr nativeFocus = GetFocusedWindow(gesture.SourceWindow);
-        var request = new AutomationRequest(gesture, token);
+        var request = new AutomationRequest(gesture, token, allowClipboard);
         bool queued;
         try { queued = _requests.TryAdd(request); }
         catch (InvalidOperationException) { return null; }
@@ -60,16 +61,21 @@ public sealed class SelectionCapture : IDisposable
                 result = await request.Completion.Task.WaitAsync(AutomationBudget, token).ConfigureAwait(false);
                 automationCompleted = true;
             }
-            catch (TimeoutException) { }
+            catch (TimeoutException) { DiagnosticLog.Write("Capture: UI Automation timed out"); }
             finally { request.Expire(); }
         }
         if (result is not null && HasSourceFocus(gesture) && (nativeFocus == IntPtr.Zero || GetFocusedWindow(gesture.SourceWindow) == nativeFocus)) return result;
         // An unreadable password property must never be interpreted as permission to copy.
         // A timed-out provider may have checked a different control before blocking. Only completed checks qualify.
         if (!automationCompleted || !allowClipboard || request.ClipboardSafety != ClipboardSafety.Safe ||
-            nativeFocus == IntPtr.Zero || !HasCopyFocus(gesture, nativeFocus)) return null;
+            nativeFocus == IntPtr.Zero || !HasCopyFocus(gesture, nativeFocus))
+        {
+            DiagnosticLog.Write($"Capture: fallback blocked; completed={automationCompleted}; enabled={allowClipboard}; safety={request.ClipboardSafety}; nativeFocus={nativeFocus != IntPtr.Zero}; sameFocus={HasCopyFocus(gesture, nativeFocus)}");
+            return null;
+        }
         var application = DesktopInterop.GetApplicationName(gesture.SourceWindow);
         if (ConsoleApplications.Contains(application)) return null;
+        DiagnosticLog.Write("Capture: starting clipboard fallback");
         return await CaptureClipboardAsync(gesture, application, nativeFocus, token).ConfigureAwait(false);
     }
 
@@ -100,6 +106,12 @@ public sealed class SelectionCapture : IDisposable
         var sourceProcess = DesktopInterop.GetProcessId(gesture.SourceWindow);
         if (sourceProcess == 0 || sourceProcess == Environment.ProcessId) return null;
         AutomationElement? focused = null;
+        if (request.AllowClipboard) request.ClipboardSafety = ReadLegacySafety(gesture);
+        if (request.ClipboardSafety == ClipboardSafety.Denied) return null;
+        var application = DesktopInterop.GetApplicationName(gesture.SourceWindow);
+        if (request.AllowClipboard && request.ClipboardSafety == ClipboardSafety.Safe &&
+            (application.Equals("FoxitPDFEditor", StringComparison.OrdinalIgnoreCase) || application.Equals("zotero", StringComparison.OrdinalIgnoreCase)))
+            return null; // These configured readers use MSAA; avoid their slow UIA bridge.
         try
         {
             focused = AutomationElement.FocusedElement;
@@ -168,6 +180,55 @@ public sealed class SelectionCapture : IDisposable
         return null;
     }
 
+    [DllImport("oleacc.dll")]
+    private static extern int AccessibleObjectFromWindow(IntPtr window, uint objectId, ref Guid iid,
+        [MarshalAs(UnmanagedType.Interface)] out Accessibility.IAccessible accessible);
+
+    private static ClipboardSafety ReadLegacySafety(SelectionGesture gesture)
+    {
+        // Some PDF/Gecko controls expose MSAA but no UIA password property.
+        // Only a focused object with a readable non-protected state qualifies for copy fallback.
+        var nativeFocus = GetFocusedWindow(gesture.SourceWindow);
+        if (nativeFocus == IntPtr.Zero || !HasSourceFocus(gesture)) return ClipboardSafety.Unknown;
+        var references = new List<object>();
+        try
+        {
+            var iid = new Guid("618736E0-3C3D-11CF-810C-00AA00389B71");
+            if (AccessibleObjectFromWindow(nativeFocus, unchecked((uint)-4), ref iid, out var current) < 0 || current is null)
+                return ClipboardSafety.Unknown;
+            references.Add(current);
+            object child = 0;
+            for (int depth = 0; depth < 8; depth++)
+            {
+                object focus = current.accFocus;
+                if (focus is Accessibility.IAccessible next)
+                {
+                    references.Add(next);
+                    current = next;
+                    if (depth == 7) return ClipboardSafety.Unknown;
+                    continue;
+                }
+                if (focus is int id) child = id;
+                break;
+            }
+            if (current.get_accState(child) is not int state) return ClipboardSafety.Unknown;
+            if ((state & 0x20000000) != 0) return ClipboardSafety.Denied;
+            bool focused = (state & 4) != 0;
+            DiagnosticLog.Write($"Capture: MSAA focused={focused}; sameFocus={HasCopyFocus(gesture, nativeFocus)}");
+            return focused && HasCopyFocus(gesture, nativeFocus) ? ClipboardSafety.Safe : ClipboardSafety.Unknown;
+        }
+        catch (Exception error) when (error is ExternalException or InvalidOperationException or ArgumentException)
+        {
+            DiagnosticLog.Write("Capture: MSAA safety unavailable", error);
+            return ClipboardSafety.Unknown;
+        }
+        finally
+        {
+            foreach (object reference in references)
+                if (Marshal.IsComObject(reference)) Marshal.ReleaseComObject(reference);
+        }
+    }
+
     private SelectionSnapshot? ReadSelectedText(AutomationElement element, AutomationRequest request)
     {
         if (!element.TryGetCurrentPattern(TextPattern.Pattern, out var value) || value is not TextPattern pattern ||
@@ -224,8 +285,9 @@ public sealed class SelectionCapture : IDisposable
                 if (releaseBudget.ElapsedMilliseconds >= 800 || !HasCopyFocus(gesture, nativeFocus)) return null;
                 await Task.Delay(20, token).ConfigureAwait(false);
             }
-            if (!HasCopyFocus(gesture, nativeFocus) || _disposed) return null;
+            if (!HasCopyFocus(gesture, nativeFocus) || _disposed) { DiagnosticLog.Write("Capture: copy focus changed"); return null; }
             backup = await OnDispatcher(dispatcher, BackupClipboard, token).ConfigureAwait(false);
+            if (backup is null) DiagnosticLog.Write("Capture: clipboard backup unavailable");
             if (backup is null || !HasCopyFocus(gesture, nativeFocus) || AnyModifierPressed() ||
                 Win32.GetClipboardSequenceNumber() != backup.Sequence) return null;
             token.ThrowIfCancellationRequested();
@@ -234,6 +296,7 @@ public sealed class SelectionCapture : IDisposable
             uint inserted = Win32.SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<Win32.Input>());
             if (inserted != inputs.Length)
             {
+                DiagnosticLog.Write("Capture: copy key injection incomplete");
                 if (inserted > 0)
                 {
                     var release = new[] { Key(0x43, true), Key(0x11, true) };
@@ -245,12 +308,18 @@ public sealed class SelectionCapture : IDisposable
             while (copyBudget.ElapsedMilliseconds < 1000)
             {
                 token.ThrowIfCancellationRequested();
-                if (!HasCopyFocus(gesture, nativeFocus) || _disposed) return null;
+                if (!HasCopyResultFocus(gesture, nativeFocus, application) || _disposed) { DiagnosticLog.Write($"Capture: result focus changed; sameWindow={HasSourceFocus(gesture)}"); return null; }
+                if (!HasSourceFocus(gesture))
+                {
+                    // Foxit's short-lived owned window must close before showing a result.
+                    await Task.Delay(25, token).ConfigureAwait(false);
+                    continue;
+                }
                 uint sequence = Win32.GetClipboardSequenceNumber();
                 if (copiedSequence != 0 && sequence != copiedSequence) return null;
                 if (sequence != backup.Sequence)
                 {
-                    if (!ClipboardBelongsToSource(gesture.SourceWindow)) return null;
+                    if (!ClipboardBelongsToSource(gesture.SourceWindow)) { DiagnosticLog.Write("Capture: clipboard owner differs from source"); return null; }
                     copiedSequence = sequence;
                     string? text = null;
                     try
@@ -262,17 +331,24 @@ public sealed class SelectionCapture : IDisposable
                         }, token).ConfigureAwait(false);
                     }
                     catch (ExternalException) { }
-                    if (Win32.GetClipboardSequenceNumber() != sequence || !HasCopyFocus(gesture, nativeFocus)) return null;
+                    if (Win32.GetClipboardSequenceNumber() != sequence || !HasCopyResultFocus(gesture, nativeFocus, application)) return null;
+                    if (!HasSourceFocus(gesture))
+                    {
+                        await Task.Delay(25, token).ConfigureAwait(false);
+                        continue;
+                    }
                     if (!string.IsNullOrWhiteSpace(text))
                     {
                         text = text.Trim();
                         if (text.Length > MaxTextLength) return null;
+                        DiagnosticLog.Write("Capture: clipboard selection captured");
                         return new SelectionSnapshot(text, application, gesture.SourceWindow,
                             new Rect(gesture.End.X, gesture.End.Y, 1, 1), gesture.End, "Clipboard", DateTimeOffset.Now);
                     }
                 }
                 await Task.Delay(25, token).ConfigureAwait(false);
             }
+            DiagnosticLog.Write("Capture: copy produced no readable text before timeout");
             return null;
         }
         catch (ExternalException error)
@@ -441,6 +517,29 @@ public sealed class SelectionCapture : IDisposable
         => gesture.SourceWindow != IntPtr.Zero && DesktopInterop.ForegroundWindow == gesture.SourceWindow;
     private static bool HasCopyFocus(SelectionGesture gesture, IntPtr nativeFocus)
         => HasSourceFocus(gesture) && GetFocusedWindow(gesture.SourceWindow) == nativeFocus;
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetWindow(IntPtr window, uint command);
+
+    private static bool HasCopyResultFocus(SelectionGesture gesture, IntPtr nativeFocus, string application)
+    {
+        bool foxit = application.Equals("FoxitPDFEditor", StringComparison.OrdinalIgnoreCase);
+        if (HasSourceFocus(gesture))
+            return foxit || GetFocusedWindow(gesture.SourceWindow) == nativeFocus;
+        if (!foxit) return false;
+        // Ctrl+C temporarily activates a Foxit-owned window. Wait only within the
+        // original copy deadline, never for an unrelated document or application.
+        IntPtr window = DesktopInterop.ForegroundWindow;
+        uint sourceProcess = DesktopInterop.GetProcessId(gesture.SourceWindow);
+        if (window == IntPtr.Zero || sourceProcess == 0) return false;
+        for (int depth = 0; depth < 8 && window != IntPtr.Zero; depth++)
+        {
+            if (DesktopInterop.GetProcessId(window) != sourceProcess) return false;
+            window = GetWindow(window, 4); // GW_OWNER
+            if (window == gesture.SourceWindow) return true;
+        }
+        return false;
+    }
+
     private static IntPtr GetFocusedWindow(IntPtr source)
     {
         uint threadId = Win32.GetWindowThreadProcessId(source, out _);
@@ -469,11 +568,12 @@ public sealed class SelectionCapture : IDisposable
         private int _expired;
         private int _safety;
         internal SelectionGesture Gesture { get; }
+        internal bool AllowClipboard { get; }
         internal CancellationToken Token { get; }
         internal TaskCompletionSource<SelectionSnapshot?> Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         internal bool IsExpired => Volatile.Read(ref _expired) != 0;
         internal ClipboardSafety ClipboardSafety { get => (ClipboardSafety)Volatile.Read(ref _safety); set => Volatile.Write(ref _safety, (int)value); }
-        internal AutomationRequest(SelectionGesture gesture, CancellationToken token) { Gesture = gesture; Token = token; }
+        internal AutomationRequest(SelectionGesture gesture, CancellationToken token, bool allowClipboard) { Gesture = gesture; Token = token; AllowClipboard = allowClipboard; }
         internal void Expire() { Volatile.Write(ref _expired, 1); Completion.TrySetResult(null); }
     }
     private sealed record ClipboardBackup(DataObject Data, uint Sequence, bool Empty);

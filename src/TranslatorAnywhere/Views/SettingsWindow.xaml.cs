@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -27,8 +26,7 @@ public partial class SettingsWindow : Window
     private int _statusVersion;
     private Control? _invalidControl;
     private int _invalidTab;
-    private Point _previewPointer = new(210, 105);
-    private BitmapSource? _previewIcon;
+    private BitmapSource? _loadedIcon;
 
     public event Action<AppSettings, IReadOnlyDictionary<Guid, string>>? SettingsSaved;
     public event Action? TestSelectionRequested;
@@ -91,7 +89,7 @@ public partial class SettingsWindow : Window
         _ready = true;
         ApplyModeControls();
         ApplyCompatibilityControls();
-        UpdatePreview();
+        UpdateColorSwatch();
         _lastSavedJson = JsonSerializer.Serialize(_draft);
         _lastSavedForm = FormSnapshot();
     }
@@ -135,12 +133,6 @@ public partial class SettingsWindow : Window
         if (!_hasPendingChanges) _lastSavedForm = FormSnapshot();
     }
 
-    private void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        PreviewText.Select(0, 7);
-        UpdatePreview();
-    }
-
     private void ColorPreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: string color }) ColorBox.Text = color;
@@ -152,7 +144,7 @@ public partial class SettingsWindow : Window
     {
         if (!_ready) return;
         ApplyModeControls();
-        UpdatePreview();
+        UpdateColorSwatch();
         QueueSave();
     }
 
@@ -246,131 +238,16 @@ public partial class SettingsWindow : Window
 
     private void ApplyCompatibilityControls() => FallbackAppsBox.IsEnabled = AutomaticFallbackBox.IsChecked == true;
 
-    private void PreviewCanvas_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void UpdateColorSwatch()
     {
-        if (!_ready) return;
-        PreviewText.Width = Math.Max(100, PreviewCanvas.ActualWidth - 32);
-        Dispatcher.BeginInvoke(new Action(UpdatePreview));
-    }
-
-    private void PreviewCanvas_MouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_ready) return;
-        _previewPointer = e.GetPosition(PreviewCanvas);
-        if (SelectedAnchor == ButtonAnchor.Cursor) UpdatePreview();
-    }
-
-    private void PreviewText_SelectionChanged(object sender, RoutedEventArgs e)
-    {
-        if (_ready) UpdatePreview();
-    }
-
-    private Rect GetPreviewSelectionBounds()
-    {
-        Rect selection = Rect.Empty;
-        for (int index = PreviewText.SelectionStart; index < PreviewText.SelectionStart + PreviewText.SelectionLength; index++)
-        {
-            Rect start = PreviewText.GetRectFromCharacterIndex(index);
-            Rect end = PreviewText.GetRectFromCharacterIndex(index, true);
-            if (start.IsEmpty || start.Height <= 0) continue;
-            var origin = PreviewText.TranslatePoint(start.TopLeft, PreviewCanvas);
-            var character = new Rect(origin.X, origin.Y, Math.Max(2, end.X - start.X), start.Height);
-            selection.Union(character);
-        }
-        return selection;
-    }
-
-    private void UpdatePreview()
-    {
-        if (!_ready || PreviewCanvas is null) return;
-        double size = SelectedSize;
-        double transparency = SelectedTransparency;
-        PreviewButton.Opacity = 1 - transparency / 100;
-        PreviewButton.Width = size;
-        PreviewButton.Height = size;
-        PreviewButton.CornerRadius = new CornerRadius(Math.Min(10, size * .22));
-        if (TryColor(ColorBox.Text, out var color))
-        {
-            var brush = new SolidColorBrush(color);
-            PreviewButton.Background = brush;
-            CurrentColorSwatch.Background = brush;
-            CurrentColorSwatch.ToolTip = $"当前颜色：#{color.R:X2}{color.G:X2}{color.B:X2}";
-        }
-
-        if (ModeBox.SelectedIndex == 2 && _previewIcon is not null)
-        {
-            PreviewButtonContent.Content = new Image { Source = _previewIcon, Width = size - 10, Height = size - 10, Stretch = Stretch.Uniform };
-        }
-        else if (ModeBox.SelectedIndex == 1)
-        {
-            PreviewButtonContent.Content = new HugeIcon
-            {
-                Kind = HugeIconKind.Translate, Width = size - 10, Height = size - 10, Foreground = Brushes.White
-            };
-        }
-        else
-        {
-            string text = ModeBox.SelectedIndex switch
-            {
-                0 => string.IsNullOrWhiteSpace(ButtonTextBox.Text) ? "翻" : ButtonTextBox.Text,
-                _ => "翻"
-            };
-            PreviewButtonContent.Content = new TextBlock
-            {
-                Text = text,
-                Foreground = Brushes.White,
-                FontSize = Math.Clamp(size * (text.Length > 2 ? 0.26 : 0.54), 10, 32),
-                FontFamily = new FontFamily("Microsoft YaHei UI"),
-                FontWeight = FontWeights.SemiBold,
-                TextAlignment = TextAlignment.Center,
-                MaxWidth = size - 6,
-                TextTrimming = TextTrimming.CharacterEllipsis
-            };
-        }
-
-        Rect bounds = GetPreviewSelectionBounds();
-        if (bounds.IsEmpty)
-        {
-            PreviewButton.Visibility = Visibility.Collapsed;
-            PreviewSelectionOutline.Visibility = Visibility.Collapsed;
-            PreviewPositionLabel.Text = "在上方文字中选中一段内容。";
-            return;
-        }
-        PreviewSelectionOutline.Visibility = Visibility.Visible;
-        PreviewSelectionOutline.Width = bounds.Width;
-        PreviewSelectionOutline.Height = bounds.Height;
-        Canvas.SetLeft(PreviewSelectionOutline, bounds.Left);
-        Canvas.SetTop(PreviewSelectionOutline, bounds.Top);
-
-        _ = double.TryParse(OffsetXBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out double offsetX);
-        _ = double.TryParse(OffsetYBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out double offsetY);
-        if (!double.IsFinite(offsetX)) offsetX = 0;
-        if (!double.IsFinite(offsetY)) offsetY = 0;
-        var anchor = SelectedAnchor;
-        double x = anchor switch
-        {
-            ButtonAnchor.SelectionTopLeft or ButtonAnchor.SelectionBottomLeft => bounds.Left - size,
-            ButtonAnchor.Cursor => _previewPointer.X,
-            _ => bounds.Right
-        };
-        double y = anchor switch
-        {
-            ButtonAnchor.SelectionTopLeft or ButtonAnchor.SelectionTopRight => bounds.Top - size,
-            ButtonAnchor.Cursor => _previewPointer.Y,
-            _ => bounds.Bottom
-        };
-        x = Math.Clamp(x + offsetX, 4, Math.Max(4, PreviewCanvas.ActualWidth - size - 4));
-        y = Math.Clamp(y + offsetY, 4, Math.Max(4, PreviewCanvas.ActualHeight - size - 4));
-        Canvas.SetLeft(PreviewButton, x);
-        Canvas.SetTop(PreviewButton, y);
-        PreviewButton.Visibility = Visibility.Visible;
-        string anchorText = (AnchorBox.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "选区右下角";
-        PreviewPositionLabel.Text = $"{anchorText} · 横向 {offsetX:+0;-0;0} px · 纵向 {offsetY:+0;-0;0} px";
+        if (!_ready || !TryColor(ColorBox.Text, out var color)) return;
+        CurrentColorSwatch.Background = new SolidColorBrush(color);
+        CurrentColorSwatch.ToolTip = $"当前颜色：#{color.R:X2}{color.G:X2}{color.B:X2}";
     }
 
     private void LoadIcon(string path)
     {
-        _previewIcon = null;
+        _loadedIcon = null;
         IconNameLabel.Text = string.IsNullOrWhiteSpace(path) ? "尚未导入" : Path.GetFileName(path);
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return;
         try
@@ -379,7 +256,7 @@ public partial class SettingsWindow : Window
             var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
             var frame = decoder.Frames[0];
             frame.Freeze();
-            _previewIcon = frame;
+            _loadedIcon = frame;
         }
         catch (Exception ex) when (ex is IOException or NotSupportedException or ArgumentException or FormatException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException)
         {
@@ -401,10 +278,10 @@ public partial class SettingsWindow : Window
         {
             string path = ImportIcon is null ? dialog.FileName : ImportIcon(dialog.FileName);
             LoadIcon(path);
-            if (_previewIcon is null) return;
+            if (_loadedIcon is null) return;
             _draft.IconPath = path;
             ModeBox.SelectedIndex = (int)ButtonVisualMode.Icon;
-            UpdatePreview();
+            UpdateColorSwatch();
             QueueSave();
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
@@ -413,7 +290,10 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void TestSelection_Click(object sender, RoutedEventArgs e) => TestSelectionRequested?.Invoke();
+    private void TestSelection_Click(object sender, RoutedEventArgs e)
+    {
+        if (FlushPendingChanges()) TestSelectionRequested?.Invoke();
+    }
 
     private bool TryReadForm(out AppSettings settings)
     {
@@ -423,7 +303,7 @@ public partial class SettingsWindow : Window
         if (!TryColor(ColorBox.Text, out Color color)) return Invalid("颜色格式应为 #RRGGBB，例如 #3390EC。", ColorBox, 0);
         if (!TryOffset(OffsetXBox.Text, out double offsetX)) return Invalid("横向偏移应为 -500 到 500 之间的数字。", OffsetXBox, 0);
         if (!TryOffset(OffsetYBox.Text, out double offsetY)) return Invalid("纵向偏移应为 -500 到 500 之间的数字。", OffsetYBox, 0);
-        if (ModeBox.SelectedIndex == 2 && (_previewIcon is null || string.IsNullOrWhiteSpace(settings.IconPath) || !File.Exists(settings.IconPath))) return Invalid("请先导入有效的按钮图标。", ModeBox, 0);
+        if (ModeBox.SelectedIndex == 2 && (_loadedIcon is null || string.IsNullOrWhiteSpace(settings.IconPath) || !File.Exists(settings.IconPath))) return Invalid("请先导入有效的按钮图标。", ModeBox, 0);
         if (!int.TryParse(DelayBox.Text, out int delay) || delay < 50 || delay > 1500) return Invalid("选区确认延迟应为 50 到 1500 毫秒。", DelayBox, 2);
         if (!int.TryParse(AutoHideBox.Text, out int hide) || hide < 2 || hide > 120) return Invalid("自动隐藏时间应为 2 到 120 秒。", AutoHideBox, 2);
         if (LanguageBox.SelectedItem is not ComboBoxItem) return Invalid("请选择目标语言。", LanguageBox, 1);

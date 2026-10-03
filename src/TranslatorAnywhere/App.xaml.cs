@@ -162,10 +162,10 @@ public partial class App : Application
                 : _settings.AutomaticClipboardFallback && _settings.ClipboardFallbackApplications.Any(name => AppNameEquals(name, appName));
             var selection = await _capture.CaptureAsync(gesture, allowClipboard, token);
             if (generation != _requestGeneration || cancellation.IsCancellationRequested) return;
-            if (selection is null || string.IsNullOrWhiteSpace(selection.Text)) return;
+            if (selection is null || string.IsNullOrWhiteSpace(selection.Text)) { DiagnosticLog.Write("Capture: no selection returned"); return; }
             if (DesktopInterop.ForegroundWindow != gesture.SourceWindow) return;
             if (fromHotkey) ShowTranslation(selection);
-            else { _button.ShowFor(selection, _settings); _buttonShown = DateTimeOffset.Now; }
+            else { _button.ShowFor(selection, _settings); _buttonShown = DateTimeOffset.Now; DiagnosticLog.Write("Capture: translation button shown"); }
         }
         catch (OperationCanceledException) { }
         catch (Exception ex)

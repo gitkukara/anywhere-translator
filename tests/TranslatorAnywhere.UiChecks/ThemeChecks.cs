@@ -68,9 +68,9 @@ internal static partial class Program
             fixture.Show();
             var tabs = (TabControl)window.FindName("SettingsTabs");
             var choice = (ListBox)window.FindName("ThemeBox");
-            tabs.SelectedIndex = 2;
+            tabs.SelectedIndex = 0;
             await LayoutAsync(window);
-            Check(choice.IsVisible && choice.Items.Cast<ListBoxItem>().Select(item => item.Content.ToString()).SequenceEqual(new[] { "跟随系统", "浅色", "深色" }), "Other settings offer exactly three fixed theme choices");
+            Check(choice.IsVisible && choice.Items.Cast<ListBoxItem>().Select(item => item.Content.ToString()).SequenceEqual(new[] { "跟随系统", "浅色", "深色" }), "Appearance settings offer exactly three fixed theme choices");
             Check(writes == 0, "Opening the theme settings does not write configuration");
             choice.SelectedIndex = 2;
             await Task.Delay(800);

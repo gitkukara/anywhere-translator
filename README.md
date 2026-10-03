@@ -2,7 +2,7 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-[下载 v1.1.0](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.0) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
+[下载 v1.1.1](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.1) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
 <img src="docs/screenshots/appearance.png" alt="浅色外观设置" width="360" />
 
@@ -20,6 +20,10 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 2. 在“翻译服务”添加供应商，填写 API Key，刷新并选择模型，测试连接后设为当前服务。
 3. 在其他应用中拖选文字，点击选区附近出现的按钮，弹出浮窗显示翻译；也可选中文字后按 `Ctrl+Alt+T`。
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。
+
+在“外观”中切换界面主题、调整按钮样式和位置；右下角“点这里预览测试”可打开测试文字窗口。
+
+**Zotero 取词**：在“其他设置”开启“兼容应用自动复制取词”，并在“兼容名单”填写 `zotero`。该方式会模拟复制来读取选中文字。
 
 **使用演示（视频由AI制作，实际体验更丝滑）：**
 
@@ -41,7 +45,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 **图标说明**：如果 `data` 中有自定义的 `app.ico`，升级后仍优先使用它。想换回新版内置图标，可以退出程序后将它改名为 `app.ico.bak`，再启动程序。
 
-**使用限制**：图片、扫描 PDF 暂不支持 OCR；部分应用可能需要兼容取词设置。
+**使用限制**：图片、扫描 PDF 暂不支持 OCR；部分应用可能需要兼容取词设置。Zotero 已在本机验证可用，福昕 PDF 编辑器兼容问题仍待完善。
 
 ## 开发
 

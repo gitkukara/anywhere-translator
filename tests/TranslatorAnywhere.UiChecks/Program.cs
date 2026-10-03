@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -282,13 +282,10 @@ internal static partial class Program
                 && persisted.ButtonColor == "#8A3FFC"
                 && persisted.Anchor == ButtonAnchor.SelectionTopLeft && persisted.OffsetX == -16 && persisted.OffsetY == 18,
                 "One save commits appearance and placement together");
-            Check(((ContentControl)window.FindName("PreviewButtonContent")).Content is HugeIcon { Kind: HugeIconKind.Translate },
-                "Symbol preview uses the shared Translate icon component");
 
             before = saved;
             var transparency = (ListBox)window.FindName("TransparencyChoice");
             Check(transparency.SelectedIndex == 3 && persisted.ButtonTransparency == 0, "Floating buttons start with zero transparency");
-            var previewTile = (Border)window.FindName("PreviewButton");
             var floatingButton = new SelectionButtonWindow();
             var work = DesktopInterop.GetWorkArea(DesktopInterop.Cursor);
             var selection = new SelectionSnapshot("fixture transparency selection", "UI fixture", IntPtr.Zero,
@@ -303,10 +300,10 @@ internal static partial class Program
                     var tile = (Border)floatingButton.FindName("Tile");
                     if (percentage == 0)
                         Check(floatingButton.FindName("Symbol") is HugeIcon { Kind: HugeIconKind.Translate, Visibility: Visibility.Visible },
-                            "Desktop symbol mode uses the same Translate icon as the preview");
+                            "Desktop symbol mode uses the shared Translate icon");
                     double expected = 1 - percentage / 100;
-                    Check(Near(previewTile.Opacity, expected) && Near(EffectiveOpacity(tile), expected),
-                        "Preview and desktop floating button agree at " + percentage + " percent transparency");
+                    Check(Near(EffectiveOpacity(tile), expected),
+                        "Desktop floating button uses the configured " + percentage + " percent transparency");
                     tile.RaiseEvent(new System.Windows.Input.MouseEventArgs(System.Windows.Input.Mouse.PrimaryDevice, Environment.TickCount)
                     { RoutedEvent = System.Windows.Input.Mouse.MouseEnterEvent });
                     bool didNotBecomeOpaque = EffectiveOpacity(tile) <= expected + 0.000001;
@@ -332,7 +329,7 @@ internal static partial class Program
                 await LayoutAsync(reopened);
                 await Task.Delay(750);
                 Check(((ListBox)reopened.FindName("TransparencyChoice")).SelectedIndex == 1
-                    && Near(((Border)reopened.FindName("PreviewButton")).Opacity, .5) && reopenedWrites == 0,
+                    && reopenedWrites == 0,
                     "Reopening restores saved transparency without an initialization write");
             }
             finally { reopened.Close(); }
@@ -508,8 +505,7 @@ internal static partial class Program
     {
         var tabs = (TabControl)window.FindName("SettingsTabs");
         var appearance = (ScrollViewer)window.FindName("AppearanceScrollViewer");
-        var options = (Border)window.FindName("AppearanceOptionsCard");
-        var preview = (Border)window.FindName("AppearancePreviewCard");
+        var testButton = (Button)window.FindName("TestSelectionButton");
         var editor = (ProviderSettingsControl)window.FindName("ProviderEditor");
         double originalWidth = window.Width;
         double originalHeight = window.Height;
@@ -518,15 +514,21 @@ internal static partial class Program
             tabs.SelectedIndex = 0;
             appearance.ScrollToTop();
             await LayoutAsync(window);
-            Rect optionsBounds = options.TransformToAncestor(appearance).TransformBounds(new Rect(options.RenderSize));
-            Rect previewBounds = preview.TransformToAncestor(appearance).TransformBounds(new Rect(preview.RenderSize));
-            Check(previewBounds.Top >= optionsBounds.Bottom - 1 && appearance.ScrollableHeight > 0,
-                "Appearance options and preview flow vertically in one scrollable page");
+            Check(window.FindName("AppearancePreviewCard") is null && testButton.Content?.ToString() == "点这里预览测试",
+                "Appearance replaces the embedded preview with the renamed test action");
+            var actionParent = (Grid)testButton.Parent;
+            Rect actionBefore = testButton.TransformToAncestor(actionParent).TransformBounds(new Rect(testButton.RenderSize));
+            Check(InViewport(testButton, actionParent) && actionBefore.Top >= appearance.ActualHeight
+                && Math.Abs(actionBefore.Right - actionParent.ActualWidth) < 1,
+                "The test action sits below the scroll area at the bottom right");
             appearance.ScrollToEnd();
             await LayoutAsync(window);
-            Check(InViewport((Button)window.FindName("TestSelectionButton"), ScrollViewport(appearance))
-                && InViewport((TextBox)window.FindName("PreviewText"), ScrollViewport(appearance)),
-                "Scrolling the default appearance page exposes its preview and test action");
+            Rect actionAfter = testButton.TransformToAncestor(actionParent).TransformBounds(new Rect(testButton.RenderSize));
+            Check(actionBefore == actionAfter, "The test action stays fixed when appearance settings scroll");
+            int requests = 0;
+            window.TestSelectionRequested += () => requests++;
+            testButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Check(requests == 1, "The test action opens the existing selection test");
             Save(window, "settings-preview.png");
 
             window.Width = window.MinWidth;
@@ -537,9 +539,8 @@ internal static partial class Program
             Save(window, "settings-minimum-options.png");
             appearance.ScrollToEnd();
             await LayoutAsync(window);
-            Check(InViewport((Button)window.FindName("TestSelectionButton"), ScrollViewport(appearance))
-                && InViewport((TextBox)window.FindName("PreviewText"), ScrollViewport(appearance)),
-                "The preview and its test action remain reachable at minimum window size");
+            Check(InViewport(testButton, (Grid)testButton.Parent),
+                "The fixed test action remains reachable at minimum window size");
             Save(window, "settings-minimum-preview.png");
 
             tabs.SelectedIndex = 1;

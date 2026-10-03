@@ -1,4 +1,4 @@
-<h1><img src="src/TranslatorAnywhere/Assets/app-256.png" alt="" width="36" height="36" align="absmiddle" /> Anywhere Translator</h1>
+<h1>Anywhere Translator</h1>
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 

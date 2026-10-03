@@ -516,15 +516,17 @@ internal static partial class Program
             await LayoutAsync(window);
             Check(window.FindName("AppearancePreviewCard") is null && testButton.Content?.ToString() == "点这里预览测试",
                 "Appearance replaces the embedded preview with the renamed test action");
-            var actionParent = (Grid)testButton.Parent;
+            var actionParent = (StackPanel)testButton.Parent;
             Rect actionBefore = testButton.TransformToAncestor(actionParent).TransformBounds(new Rect(testButton.RenderSize));
-            Check(InViewport(testButton, actionParent) && actionBefore.Top >= appearance.ActualHeight
+            var card = (Border)window.FindName("AppearanceOptionsCard");
+            double cardBottom = card.TranslatePoint(new Point(0, card.ActualHeight), actionParent).Y;
+            Check(Math.Abs(actionBefore.Top - cardBottom - 4) < 1
                 && Math.Abs(actionBefore.Right - actionParent.ActualWidth) < 1,
-                "The test action sits below the scroll area at the bottom right");
+                "The test action follows the appearance card with a four-pixel gap");
             appearance.ScrollToEnd();
             await LayoutAsync(window);
             Rect actionAfter = testButton.TransformToAncestor(actionParent).TransformBounds(new Rect(testButton.RenderSize));
-            Check(actionBefore == actionAfter, "The test action stays fixed when appearance settings scroll");
+            Check(actionBefore == actionAfter, "The test action retains its spacing within the scrolling content");
             int requests = 0;
             window.TestSelectionRequested += () => requests++;
             testButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
@@ -539,8 +541,8 @@ internal static partial class Program
             Save(window, "settings-minimum-options.png");
             appearance.ScrollToEnd();
             await LayoutAsync(window);
-            Check(InViewport(testButton, (Grid)testButton.Parent),
-                "The fixed test action remains reachable at minimum window size");
+            Check(InViewport(testButton, ScrollViewport(appearance)),
+                "The test action remains reachable by scrolling at minimum window size");
             Save(window, "settings-minimum-preview.png");
 
             tabs.SelectedIndex = 1;

@@ -40,6 +40,12 @@ public partial class SettingsWindow : Window
         _draft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings)) ?? new AppSettings();
         InitializeComponent();
         ThemeService.TrackWindow(this);
+        Loaded += (_, _) => FitAppearanceHeight();
+        SettingsTabs.SelectionChanged += (_, e) =>
+        {
+            if (ReferenceEquals(e.OriginalSource, SettingsTabs))
+                Dispatcher.BeginInvoke(new Action(FitAppearanceHeight), DispatcherPriority.Loaded);
+        };
         ThemeBox.SelectedIndex = (int)_draft.Theme;
         ModeBox.SelectedIndex = (int)_draft.ButtonMode;
         AnchorBox.SelectedValue = _draft.Anchor.ToString();
@@ -229,6 +235,17 @@ public partial class SettingsWindow : Window
         ButtonTextBox.IsEnabled = ModeBox.SelectedIndex == 0;
         TextModeRow.Visibility = ModeBox.SelectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
         IconModeRow.Visibility = ModeBox.SelectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+        if (IsLoaded) Dispatcher.BeginInvoke(new Action(FitAppearanceHeight), DispatcherPriority.Loaded);
+    }
+
+    private void FitAppearanceHeight()
+    {
+        if (!IsLoaded || SettingsTabs.SelectedIndex != 0 || WindowState != WindowState.Normal) return;
+        UpdateLayout();
+        double height = ActualHeight + AppearanceScrollViewer.ExtentHeight - AppearanceScrollViewer.ViewportHeight + 16;
+        double limit = Math.Min(MaxHeight, SystemParameters.WorkArea.Height);
+        height = Math.Clamp(Math.Ceiling(height), MinHeight, Math.Max(MinHeight, limit));
+        if (Math.Abs(Height - height) > 0.5) Height = height;
     }
 
     private void AutomaticFallback_Changed(object sender, RoutedEventArgs e)

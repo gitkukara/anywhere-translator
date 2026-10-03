@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -41,12 +41,16 @@ public partial class SettingsWindow : Window
         // Keep incomplete edits separate from the last successfully persisted configuration.
         _draft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings)) ?? new AppSettings();
         InitializeComponent();
+        ThemeService.TrackWindow(this);
+        ThemeBox.SelectedIndex = (int)_draft.Theme;
         ModeBox.SelectedIndex = (int)_draft.ButtonMode;
-        AnchorBox.SelectedIndex = (int)_draft.Anchor;
+        AnchorBox.SelectedValue = _draft.Anchor.ToString();
+        if (AnchorBox.SelectedIndex < 0) AnchorBox.ToolTip = "保留原来的鼠标附近位置，选择方位后更改。";
+        AnchorBox.SelectionChanged += (_, _) => { if (AnchorBox.SelectedIndex >= 0) AnchorBox.ToolTip = null; };
         ButtonTextBox.Text = _draft.ButtonText;
         ColorBox.Text = DisplayColor(_draft.ButtonColor);
-        SizeSlider.Value = Math.Clamp(_draft.ButtonSize, SizeSlider.Minimum, SizeSlider.Maximum);
-        TransparencySlider.Value = double.IsFinite(_draft.ButtonTransparency) ? Math.Clamp(_draft.ButtonTransparency, 0, 100) : 0;
+        SelectValue(SizeChoice, _draft.ButtonSize);
+        SelectValue(TransparencyChoice, 100 - _draft.ButtonTransparency);
         OffsetXBox.Text = _draft.OffsetX.ToString(CultureInfo.InvariantCulture);
         OffsetYBox.Text = _draft.OffsetY.ToString(CultureInfo.InvariantCulture);
         EnabledBox.IsChecked = _draft.Enabled;
@@ -66,6 +70,7 @@ public partial class SettingsWindow : Window
         foreach (var textBox in new[] { DelayBox, AutoHideBox, FallbackAppsBox, ExcludedAppsBox })
             textBox.TextChanged += (_, _) => QueueSave();
         LanguageBox.SelectionChanged += (_, _) => QueueSave();
+        ThemeBox.SelectionChanged += (_, _) => QueueSave();
         foreach (var checkBox in new[] { EnabledBox, LaunchAtStartupCheck, HotkeyFallbackBox, AutomaticFallbackBox })
         {
             checkBox.Checked += (_, _) => QueueSave();
@@ -136,6 +141,13 @@ public partial class SettingsWindow : Window
         UpdatePreview();
     }
 
+    private void ColorPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string color }) ColorBox.Text = color;
+    }
+
+    private void Form_SelectionChanged(object sender, SelectionChangedEventArgs e) => Form_Changed(sender, e);
+
     private void Form_Changed(object sender, RoutedEventArgs e)
     {
         if (!_ready) return;
@@ -195,11 +207,24 @@ public partial class SettingsWindow : Window
         }
     }
 
+    private ButtonAnchor SelectedAnchor => AnchorBox.SelectedValue is string name && Enum.TryParse<ButtonAnchor>(name, out var anchor) ? anchor : _draft.Anchor;
+    private double SelectedSize => ChoiceValue(SizeChoice) ?? _draft.ButtonSize;
+    private double SelectedTransparency => ChoiceValue(TransparencyChoice) is double opacity ? 100 - opacity : _draft.ButtonTransparency;
+    private static double? ChoiceValue(ListBox choice) => choice.SelectedItem is ListBoxItem item
+        ? double.Parse((string)item.Tag, CultureInfo.InvariantCulture) : null;
+    private static void SelectValue(ListBox choice, double value)
+    {
+        choice.SelectedItem = choice.Items.Cast<ListBoxItem>().FirstOrDefault(item =>
+            double.Parse((string)item.Tag, CultureInfo.InvariantCulture) == value);
+        if (choice.SelectedIndex < 0) choice.ToolTip = $"保留原值：{value:0.##}，选择档位后更改。";
+        choice.SelectionChanged += (_, _) => { if (choice.SelectedIndex >= 0) choice.ToolTip = null; };
+    }
+
     private string FormSnapshot() => JsonSerializer.Serialize(new
     {
-        Mode = ModeBox.SelectedIndex, Label = ButtonTextBox.Text, Color = ColorBox.Text,
-        Size = SizeSlider.Value, Transparency = TransparencySlider.Value,
-        Anchor = AnchorBox.SelectedIndex, X = OffsetXBox.Text, Y = OffsetYBox.Text,
+        Theme = ThemeBox.SelectedIndex, Mode = ModeBox.SelectedIndex, Label = ButtonTextBox.Text, Color = ColorBox.Text,
+        Size = SelectedSize, Transparency = SelectedTransparency,
+        Anchor = SelectedAnchor, X = OffsetXBox.Text, Y = OffsetYBox.Text,
         Enabled = EnabledBox.IsChecked, Startup = LaunchAtStartupCheck.IsChecked,
         Delay = DelayBox.Text, Hide = AutoHideBox.Text, Hotkey = HotkeyFallbackBox.IsChecked,
         Automatic = AutomaticFallbackBox.IsChecked, FallbackApps = FallbackAppsBox.Text,
@@ -232,7 +257,7 @@ public partial class SettingsWindow : Window
     {
         if (!_ready) return;
         _previewPointer = e.GetPosition(PreviewCanvas);
-        if (AnchorBox.SelectedIndex == (int)ButtonAnchor.Cursor) UpdatePreview();
+        if (SelectedAnchor == ButtonAnchor.Cursor) UpdatePreview();
     }
 
     private void PreviewText_SelectionChanged(object sender, RoutedEventArgs e)
@@ -258,16 +283,19 @@ public partial class SettingsWindow : Window
     private void UpdatePreview()
     {
         if (!_ready || PreviewCanvas is null) return;
-        double size = SizeSlider.Value;
-        SizeLabel.Text = $"{size:0} px";
-        double transparency = TransparencySlider.Value;
-        TransparencyLabel.Text = $"{transparency:0}%";
+        double size = SelectedSize;
+        double transparency = SelectedTransparency;
         PreviewButton.Opacity = 1 - transparency / 100;
         PreviewButton.Width = size;
         PreviewButton.Height = size;
         PreviewButton.CornerRadius = new CornerRadius(Math.Min(10, size * .22));
-        if (TryColor(ColorBox.Text, out var color)) PreviewButton.Background = new SolidColorBrush(color);
-        else PreviewButton.Background = (Brush)FindResource("AccentBrush");
+        if (TryColor(ColorBox.Text, out var color))
+        {
+            var brush = new SolidColorBrush(color);
+            PreviewButton.Background = brush;
+            CurrentColorSwatch.Background = brush;
+            CurrentColorSwatch.ToolTip = $"当前颜色：#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
 
         if (ModeBox.SelectedIndex == 2 && _previewIcon is not null)
         {
@@ -318,7 +346,7 @@ public partial class SettingsWindow : Window
         _ = double.TryParse(OffsetYBox.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out double offsetY);
         if (!double.IsFinite(offsetX)) offsetX = 0;
         if (!double.IsFinite(offsetY)) offsetY = 0;
-        var anchor = (ButtonAnchor)Math.Clamp(AnchorBox.SelectedIndex, 0, 4);
+        var anchor = SelectedAnchor;
         double x = anchor switch
         {
             ButtonAnchor.SelectionTopLeft or ButtonAnchor.SelectionBottomLeft => bounds.Left - size,
@@ -336,7 +364,7 @@ public partial class SettingsWindow : Window
         Canvas.SetLeft(PreviewButton, x);
         Canvas.SetTop(PreviewButton, y);
         PreviewButton.Visibility = Visibility.Visible;
-        string anchorText = (AnchorBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "选区右下角";
+        string anchorText = (AnchorBox.SelectedItem as ListBoxItem)?.Content?.ToString() ?? "选区右下角";
         PreviewPositionLabel.Text = $"{anchorText} · 横向 {offsetX:+0;-0;0} px · 纵向 {offsetY:+0;-0;0} px";
     }
 
@@ -404,14 +432,15 @@ public partial class SettingsWindow : Window
         List<string> fallbackApps = ParseApplications(FallbackAppsBox.Text);
         if (AutomaticFallbackBox.IsChecked == true && fallbackApps.Count == 0) return Invalid("启用自动复制取词前，请添加至少一个兼容应用。", FallbackAppsBox, 2);
 
+        settings.Theme = (AppTheme)Math.Clamp(ThemeBox.SelectedIndex, 0, 2);
         settings.Enabled = EnabledBox.IsChecked == true;
         settings.LaunchAtStartup = LaunchAtStartupCheck.IsChecked == true;
         settings.ButtonMode = (ButtonVisualMode)Math.Clamp(ModeBox.SelectedIndex, 0, 2);
         settings.ButtonText = label;
         settings.ButtonColor = RgbHex(color);
-        settings.ButtonSize = SizeSlider.Value;
-        settings.ButtonTransparency = TransparencySlider.Value;
-        settings.Anchor = (ButtonAnchor)Math.Clamp(AnchorBox.SelectedIndex, 0, 4);
+        settings.ButtonSize = SelectedSize;
+        settings.ButtonTransparency = SelectedTransparency;
+        settings.Anchor = SelectedAnchor;
         settings.OffsetX = offsetX;
         settings.OffsetY = offsetY;
         settings.SelectionDelayMs = delay;
@@ -446,7 +475,7 @@ public partial class SettingsWindow : Window
         ++_statusVersion;
         StatusLabel.Text = text;
         StatusLabel.ToolTip = text;
-        StatusLabel.Foreground = (Brush)FindResource("ErrorBrush");
+        StatusLabel.SetResourceReference(TextBlock.ForegroundProperty, "ErrorBrush");
         StatusLabel.Visibility = Visibility.Visible;
     }
 

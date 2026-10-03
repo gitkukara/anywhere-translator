@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,10 +21,14 @@ internal static class ProviderPersistenceChecks
             Check(fresh.Providers.Count == 1 && fresh.Providers[0].PresetId == "deepseek", "New configuration seeds DeepSeek");
             Check(fresh.ActiveProviderId == fresh.Providers[0].Id && fresh.Providers[0].Models.Count == 0
                 && fresh.Providers[0].SelectedModel.Length == 0, "New presets require a fetched or manual model");
-            Check(ProviderRegistry.AllPresets.Count == 5 && ProviderRegistry.AllPresets.Select(item => item.Id).Distinct().Count() == 5,
+            Check(ProviderRegistry.AllPresets.Count == 7 && ProviderRegistry.AllPresets.Select(item => item.Id).Distinct().Count() == 7,
                 "All required provider presets have unique IDs");
-            Check(ProviderRegistry.CreateProvider("anthropic").Protocol == ProviderProtocol.AnthropicMessages,
-                "Anthropic preset uses its own wire protocol");
+            var glm = ProviderRegistry.CreateProvider("zhipu");
+            Check(glm.Protocol == ProviderProtocol.OpenAICompatible && glm.RequiresApiKey && glm.Models.Count == 0, "GLM preset requests credentials and a user-selected model");
+            Check(TranslationService.BuildEndpoint(glm).AbsoluteUri == "https://open.bigmodel.cn/api/paas/v4/chat/completions", "GLM requests preserve the official v4 directory");
+            Check(!ProviderRegistry.AllPresets.Any(preset => preset.Id == "anthropic"), "Anthropic is absent from the add catalogue");
+            Check(TranslationService.BuildEndpoint(ProviderRegistry.CreateProvider("mimo")).AbsoluteUri == "https://api.xiaomimimo.com/v1/chat/completions", "MiMo preset uses its official endpoint");
+            Check(TranslationService.BuildEndpoint(ProviderRegistry.CreateProvider("qwen")).AbsoluteUri == "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", "Qwen preset preserves the compatibility path");
             Check(ProviderRegistry.CreateProvider("custom").Models.Count == 0, "Custom service starts without a hardcoded model list");
 
             const string legacyJson = "{\"ProviderName\":\"Custom legacy\",\"BaseUrl\":\"https://legacy.example.test/compatible-mode/v1\",\"Model\":\"preserved-model\",\"DisableThinking\":false}";

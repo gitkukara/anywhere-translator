@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TranslatorAnywhere.Models;
@@ -13,8 +13,10 @@ public static class ProviderRegistry
     public static IReadOnlyList<ProviderPreset> AllPresets { get; } = Array.AsReadOnly(new[]
     {
         new ProviderPreset("deepseek", "DeepSeek", "国内服务", "https://api.deepseek.com", ProviderProtocol.OpenAICompatible, true, "#4D6BFE", "D"),
+        new ProviderPreset("zhipu", "智谱 GLM", "国内服务", "https://open.bigmodel.cn/api/paas/v4", ProviderProtocol.OpenAICompatible, true, "#3859FF", "Z"),
+        new ProviderPreset("mimo", "小米 MiMo", "国内服务", "https://api.xiaomimimo.com/v1", ProviderProtocol.OpenAICompatible, true, "#70839D", "M"),
+        new ProviderPreset("qwen", "千问 Qwen", "国内服务", "https://dashscope.aliyuncs.com/compatible-mode/v1", ProviderProtocol.OpenAICompatible, true, "#615CED", "Q"),
         new ProviderPreset("openai", "OpenAI", "国际服务", "https://api.openai.com/v1", ProviderProtocol.OpenAICompatible, true, "#10A37F", "O"),
-        new ProviderPreset("anthropic", "Anthropic", "国际服务", "https://api.anthropic.com/v1", ProviderProtocol.AnthropicMessages, true, "#D97757", "A"),
         new ProviderPreset("gemini", "Google Gemini", "国际服务", "https://generativelanguage.googleapis.com/v1beta/openai", ProviderProtocol.OpenAICompatible, true, "#4285F4", "G"),
         new ProviderPreset("custom", "自定义服务", "自定义", "", ProviderProtocol.OpenAICompatible, true, "#70839D", "+")
     });

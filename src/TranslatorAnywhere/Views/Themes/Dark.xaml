@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#17212B" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#202D3A" />
+    <SolidColorBrush x:Key="FieldBrush" Color="#263747" />
+    <SolidColorBrush x:Key="InkBrush" Color="#E9F0F7" />
+    <SolidColorBrush x:Key="MutedBrush" Color="#A6B6C5" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#78BEFF" />
+    <SolidColorBrush x:Key="AccentFillBrush" Color="#2D83CF" />
+    <SolidColorBrush x:Key="AccentLightBrush" Color="#294761" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#374C5E" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#FF9B9F" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#365E80" />
+    <SolidColorBrush x:Key="SelectionOutlineBrush" Color="#78BEFF" />
+    <SolidColorBrush x:Key="CheckBorderBrush" Color="#5B7185" />
+    <SolidColorBrush x:Key="SwitchOffBrush" Color="#52687A" />
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#586F82" />
+    <SolidColorBrush x:Key="ScrollHoverBrush" Color="#7F99AF" />
+    <SolidColorBrush x:Key="TabBrush" Color="#263747" />
+    <SolidColorBrush x:Key="TabHoverBrush" Color="#314A60" />
+</ResourceDictionary>

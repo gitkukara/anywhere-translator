@@ -123,6 +123,7 @@ public sealed class SettingsStore
     private static AppSettings Normalize(AppSettings settings, bool migrateColorAlpha = false)
     {
         var defaults = new AppSettings();
+        if (!Enum.IsDefined(settings.Theme)) settings.Theme = defaults.Theme;
         if (!Enum.IsDefined(settings.ButtonMode)) settings.ButtonMode = defaults.ButtonMode;
         if (!Enum.IsDefined(settings.Anchor)) settings.Anchor = defaults.Anchor;
         settings.ButtonSize = double.IsFinite(settings.ButtonSize) ? Math.Clamp(settings.ButtonSize, 24, 72) : defaults.ButtonSize;

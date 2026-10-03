@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -215,7 +215,20 @@ internal static class ProviderProtocolChecks
         {
             Equal(0, handler.Calls, "Connection service constructor sends no requests");
             var models = await service.ListModelsAsync(provider, Key, CancellationToken.None);
-            Equal("a-model,z-model", string.Join(',', models), "Model discovery deduplicates valid IDs and sorts");
+            Equal("z-model,a-model", string.Join(',', models), "Model discovery deduplicates valid IDs and sorts");
+        }
+
+        const string datedModels = """
+            {"data":[{"id":"z-old","created":100},{"id":"a-new","created":300},
+              {"id":"z-old","created":200},{"id":"iso","created_at":"2026-01-01T00:00:00Z"},
+              {"id":"model-9"},{"id":"model-10"},{"id":"model-2","created":"bad"},
+              {"id":"model-1","created":-1}]}
+            """;
+        using (var service = new ProviderConnectionService(new FakeHandler((_, _) => Task.FromResult(JsonResponse(datedModels)))))
+        {
+            var models = await service.ListModelsAsync(provider, Key, CancellationToken.None);
+            Equal("iso,a-new,z-old,model-10,model-9,model-2,model-1", string.Join(',', models),
+                "Discovery sorts dated models newest first and undated models by descending natural version, deduplicating IDs");
         }
 
         var anthropic = Profile("https://api.anthropic.com/v1", ProviderProtocol.AnthropicMessages);

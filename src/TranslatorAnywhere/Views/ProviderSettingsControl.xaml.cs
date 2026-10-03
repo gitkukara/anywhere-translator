@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -114,10 +114,9 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         _editing = null;
         ListView.Visibility = DetailView.Visibility = Visibility.Collapsed;
         CatalogView.Visibility = Visibility.Visible;
-        CatalogSearchBox.Text = "";
         RefreshCatalog();
         ClearStatus();
-        CatalogSearchBox.Focus();
+        CatalogBackButton.Focus();
     }
 
     public Guid AddPreset(string presetId)
@@ -192,12 +191,13 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
             content.ColumnDefinitions.Add(new ColumnDefinition());
             content.Children.Add(CreateLogo(provider.PresetId));
             var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
-            text.Children.Add(new TextBlock { Text = provider.Name.Length > 0 ? provider.Name : "未命名服务", Foreground = Brush("InkBrush"), FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis });
-            text.Children.Add(new TextBlock { Text = Host(provider.BaseUrl) + "  ·  " + provider.Models.Count + " 个模型", FontSize = 12, Foreground = Brush("MutedBrush"), Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
+            text.Children.Add(Themed(new TextBlock { Text = provider.Name.Length > 0 ? provider.Name : "未命名服务", FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "InkBrush"));
+            text.Children.Add(Themed(new TextBlock { Text = Host(provider.BaseUrl) + "  ·  " + provider.Models.Count + " 个模型", FontSize = 12, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "MutedBrush"));
             string model = provider.SelectedModel.Length > 0 ? provider.SelectedModel : "未选择模型";
             string providerKey = GetKey(provider.Id);
             string credential = _unreadableKeys.Contains(provider.Id) ? "密钥需重新填写" : providerKey.Length > 0 ? "已配置密钥" : provider.RequiresApiKey ? "未配置密钥" : "本机服务";
-            var detail = new TextBlock { Text = model + "  ·  " + credential + (_tested.Contains(provider.Id) ? "  ·  测试通过" : ""), FontSize = 11, Foreground = Brush("MutedBrush"), Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis };
+            var detail = new TextBlock { Text = model + "  ·  " + credential + (_tested.Contains(provider.Id) ? "  ·  测试通过" : ""), FontSize = 11, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis };
+            detail.SetResourceReference(TextBlock.ForegroundProperty, "MutedBrush");
             text.Children.Add(detail);
             Grid.SetColumn(text, 1);
             content.Children.Add(text);
@@ -205,7 +205,9 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
             open.Click += (_, _) => OpenProvider(provider.Id);
             row.Children.Add(open);
             bool current = _activeId == provider.Id;
-            var use = new Button { Content = current ? "当前服务" : "使用", MinWidth = 74, Style = (Style)FindResource("SubtleButton"), Background = current ? Brush("AccentLightBrush") : Brushes.Transparent, Foreground = current ? Brush("AccentBrush") : Brush("MutedBrush"), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 9, 0), ToolTip = current ? "当前翻译服务" : "设为当前翻译服务", IsEnabled = provider.Enabled || current };
+            var use = new Button { Content = current ? "当前服务" : "使用", MinWidth = 74, Style = (Style)FindResource("SubtleButton"), Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 9, 0), ToolTip = current ? "当前翻译服务" : "设为当前翻译服务", IsEnabled = provider.Enabled || current };
+            if (current) use.SetResourceReference(Control.BackgroundProperty, "AccentLightBrush");
+            use.SetResourceReference(Control.ForegroundProperty, current ? "AccentBrush" : "MutedBrush");
             use.Click += (_, _) => { try { ActivateProvider(provider.Id); } catch (ArgumentException ex) { SetStatus(ex.Message, true); } };
             Grid.SetColumn(use, 1);
             row.Children.Add(use);
@@ -222,7 +224,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
             chevron.Click += (_, _) => OpenProvider(provider.Id);
             Grid.SetColumn(chevron, 3);
             row.Children.Add(chevron);
-            ProviderListPanel.Children.Add(new Border { BorderBrush = Brush("DividerBrush"), BorderThickness = new Thickness(0, 0, 0, provider == _providers[^1] ? 0 : 1), Child = row });
+            ProviderListPanel.Children.Add(Themed(new Border { BorderThickness = new Thickness(0, 0, 0, provider == _providers[^1] ? 0 : 1), Child = row }, Border.BorderBrushProperty, "DividerBrush"));
         }
     }
 
@@ -246,12 +248,9 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
 
     private void RefreshCatalog()
     {
-        string query = CatalogSearchBox.Text.Trim();
         var entries = ProviderRegistry.AllPresets
-            .Where(p => query.Length == 0 || (p.Name + " " + p.Category + " " + p.BaseUrl).Contains(query, StringComparison.OrdinalIgnoreCase))
             .Select(p => new PresetEntry(p.Id, p.Id == "custom" ? "自定义接口" : p.Name, p.Category, TryFindResource("ProviderIcon." + p.Id) as ImageSource, Accent(p.AccentColor))).ToArray();
         CatalogItems.ItemsSource = entries;
-        CatalogEmptyLabel.Visibility = entries.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void LoadEditor()
@@ -316,7 +315,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         if (_editing is null) return;
         bool current = _activeId == _editing.Id;
         UseProviderButton.Content = current ? "当前服务" : "设为当前服务";
-        UseProviderButton.Foreground = current ? Brush("AccentBrush") : Brush("InkBrush");
+        UseProviderButton.SetResourceReference(Control.ForegroundProperty, current ? "AccentBrush" : "InkBrush");
         UseProviderButton.IsEnabled = _operation is null && (_editing.Enabled || current);
     }
 
@@ -343,6 +342,8 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     }
 
     private void Editor_TextChanged(object sender, TextChangedEventArgs e) => EditorChanged();
+    private void EditorSelection_Changed(object sender, SelectionChangedEventArgs e) => EditorChanged();
+
     private void Editor_Changed(object sender, RoutedEventArgs e) => EditorChanged();
     private void EditorChanged()
     {
@@ -402,7 +403,6 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     private void AddProvider_Click(object sender, RoutedEventArgs e) => OpenCatalog();
     private void BackToList_Click(object sender, RoutedEventArgs e) => ShowProviderList();
     private void DetailBack_Click(object sender, RoutedEventArgs e) => ShowProviderList();
-    private void CatalogSearch_Changed(object sender, TextChangedEventArgs e) { if (CatalogItems is not null) RefreshCatalog(); }
     private void Preset_Click(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not string id) return;
@@ -555,7 +555,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         _statusTimer.Stop();
         ProviderStatusLabel.Text = text;
         ProviderStatusLabel.ToolTip = text;
-        ProviderStatusLabel.Foreground = Brush(error ? "ErrorBrush" : "MutedBrush");
+        ProviderStatusLabel.SetResourceReference(TextBlock.ForegroundProperty, error ? "ErrorBrush" : "MutedBrush");
         ProviderStatusLabel.Visibility = Visibility.Visible;
         if (!error && !persistent) _statusTimer.Start();
     }
@@ -575,6 +575,12 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         _acceptedEndpoints.Clear();
         foreach (var provider in _providers) _acceptedEndpoints[provider.Id] = provider.BaseUrl;
     }
+    private static T Themed<T>(T element, DependencyProperty property, string key) where T : FrameworkElement
+    {
+        element.SetResourceReference(property, key);
+        return element;
+    }
+
     private Brush Brush(string key) => (Brush)FindResource(key);
     private Brush Accent(string? color)
     {

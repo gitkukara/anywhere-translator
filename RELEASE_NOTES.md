@@ -1,28 +1,31 @@
-# v0.3.8
+# v0.3.9
 
-Anywhere Translator 的首个公开版本：在 Windows 桌面应用中选中文字，通过自己配置的 AI API 翻译。
+本次更新完善设置界面、明暗主题和翻译浮窗交互，并增加国内供应商快捷配置。
 
-## 功能
+## 更新内容
 
-- 拖选或双击取词，选区旁显示翻译按钮；支持全局快捷键 `Ctrl+Alt+T` 和指定应用的复制降级。
-- 支持 DeepSeek、OpenAI、Anthropic、Google Gemini 及自定义兼容接口。供应商实例、密钥、模型和当前服务独立管理，可主动刷新模型或测试连接。
-- 流式翻译浮窗支持停止、重试、复制、置顶和快捷键，显示本次请求的供应商与模型。
-- 可设置按钮文字、图案、自定义图片、颜色、大小、透明度和选区位置；设置实时预览并自动保存。
-- API Key 使用 Windows 当前用户加密，默认不保存原文、译文或历史。
-- 托盘后台运行，支持当前用户启动文件夹快捷方式登记，并尊重 Windows 启动应用的禁用状态。
+- 新增跟随系统、浅色、深色主题，设置、翻译浮窗和托盘菜单同步切换，自动保存。
+- 外观选项改为紧凑横排选择：文字／符号／自设，四档按钮大小与透明度，以及左上／左下／右上／右下方位。
+- 新增三个颜色预设及当前颜色色块；色码和偏移输入框收窄，下拉框按最长文字自适应宽度。
+- 新增智谱 GLM、小米 MiMo、千问 Qwen 快捷配置，移除 Anthropic 添加入口和供应商搜索框；已保存的服务配置仍可使用。
+- 刷新模型自动保存名称，优先按创建时间倒序；缺少时间时按名称中的数字自然倒序排列。保留当前所选模型，不自动更换服务。
+- 未钉住的翻译浮窗点击外部即收起，并取消未完成请求；钉住后保持显示。移除关闭图标，仍支持 Esc 收起。
+- 更新自定义应用图标，设置窗口标题统一为 Anywhere Translator。
 
-## 下载与运行
+## 下载与升级
 
-从 [GitHub Releases](https://github.com/gitkukara/anywhere-translator/releases/tag/v0.3.8) 下载 `TranslatorAnywhere-v0.3.8-win-x64.zip`。需要 Windows x64 和 [.NET 10 Desktop Runtime 的 Windows x64 版本](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。
+下载 `TranslatorAnywhere-v0.3.9-win-x64.zip`，需要 Windows x64 和 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。
 
-完整解压后运行 `TranslatorAnywhere.exe`，保持随附文件在同一目录。首次运行需自行配置服务和 API Key。更新时保留 `data/` 目录；GitHub 的 `Source code` 压缩包需要先构建。
+从托盘退出旧程序，再将压缩包内容覆盖到原目录，保留 `data/` 目录即可继续使用原配置和密钥。若旧的 `data/app.ico` 存在，它会覆盖新版窗口和托盘图标；想使用新版内置图标，可将此文件改名备份。首次使用需自行填写 API Key、刷新或手动指定模型，并测试连接。
+
+附带 `.sha256` 校验文件。发布包不包含个人配置、API Key、日志或运行时；GitHub 的 Source code 压缩包需自行构建。
 
 ## 验证与限制
 
-通过 293 项本地服务检查和 102 项界面模拟检查，测试使用独立目录与模拟服务，未使用真实 API Key 请求外部服务。
+通过 307 项本地服务检查和 134 项界面检查，使用隔离目录及模拟服务，未调用真实付费 API。已检查浅色、深色和最小窗口布局。
 
-已验证启动快捷方式能被 Windows 启动项枚举识别，并可执行为不弹出设置的后台进程；尚未通过重启或重新登录验证登录触发。
+模型列表由服务商返回，不保证每个模型均支持当前账户或翻译接口；创建时间也不一定等同于发布日期。可通过“测试连接”验证当前所选模型。
 
-取词依赖目标应用暴露可访问的文字选区。图片和扫描 PDF 暂无 OCR；部分自绘界面、高权限窗口、Word、微信、各类 PDF 阅读器、混合 DPI 多屏与复制降级仍需逐个实测。当前提供浅色界面。
+取词仍依赖目标应用提供可访问的文字选区，暂不支持图片或扫描 PDF 的 OCR。部分自绘界面、高权限窗口和混合 DPI 多屏仍需逐个实测。
 
-本项目采用 [MIT 许可证](https://github.com/gitkukara/anywhere-translator/blob/v0.3.8/LICENSE)。第三方图标授权见 [THIRD-PARTY-NOTICES.md](https://github.com/gitkukara/anywhere-translator/blob/v0.3.8/THIRD-PARTY-NOTICES.md)，详细用法见 [README](https://github.com/gitkukara/anywhere-translator/blob/v0.3.8/README.md)。
+本项目采用 MIT 许可证，第三方图标授权见随附的 THIRD-PARTY-NOTICES.md。

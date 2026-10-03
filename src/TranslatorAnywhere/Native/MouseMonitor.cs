@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -23,6 +23,7 @@ public sealed class MouseMonitor : IDisposable
 
     public event Action<SelectionGesture>? SelectionFinished;
     public event Action<Point>? PointerPressed;
+    public event Action<Point>? AnyPointerPressed;
     public event Action? DismissRequested;
 
     public MouseMonitor() => _callback = OnHook;
@@ -97,6 +98,8 @@ public sealed class MouseMonitor : IDisposable
             if (_disposed) break;
             try
             {
+                if (item.Message is Win32.WmLeftDown or Win32.WmRightDown or Win32.WmMiddleDown or Win32.WmXDown)
+                    AnyPointerPressed?.Invoke(item.Point);
                 bool ownPointer = DesktopInterop.IsOwnWindow(DesktopInterop.WindowAt(item.Point));
                 if (item.Message is Win32.WmMouseWheel or Win32.WmMouseHWheel)
                 {

@@ -1,6 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -53,7 +55,7 @@ public sealed class ProviderConnectionService : IDisposable
         budget.CancelAfter(RequestBudget);
         try
         {
-            var models = new HashSet<string>(StringComparer.Ordinal);
+            var models = new Dictionary<string, long>(StringComparer.Ordinal);
             var cursors = new HashSet<string>(StringComparer.Ordinal);
             string? cursor = null;
             for (int page = 0; page < MaximumPages; page++)
@@ -83,7 +85,8 @@ public sealed class ProviderConnectionService : IDisposable
                         || identifier.ValueKind != JsonValueKind.String) continue;
                     string id = (identifier.GetString() ?? "").Trim();
                     if (id.Length == 0 || id.Length > 200 || id.Any(char.IsControl)) continue;
-                    models.Add(id);
+                    long created = ReadModelCreated(item);
+                    if (!models.TryGetValue(id, out long previous) || created > previous) models[id] = created;
                     if (models.Count > MaximumModels)
                         throw new InvalidOperationException("服务商模型数量超过获取上限，请手动填写需要的模型名称。");
                 }
@@ -93,7 +96,9 @@ public sealed class ProviderConnectionService : IDisposable
                 {
                     if (models.Count == 0)
                         throw new InvalidOperationException("服务商没有返回可用模型，请检查权限或手动填写模型名称。");
-                    return models.OrderBy(id => id, StringComparer.OrdinalIgnoreCase).ToArray();
+                    return models.OrderByDescending(entry => entry.Value)
+                        .ThenByDescending(entry => entry.Key, Comparer<string>.Create(CompareModelNames))
+                        .Select(entry => entry.Key).ToArray();
                 }
                 if (!root.TryGetProperty("last_id", out var lastId) || lastId.ValueKind != JsonValueKind.String)
                     throw new InvalidOperationException("服务商模型分页格式异常，请手动填写模型名称。");
@@ -142,6 +147,36 @@ public sealed class ProviderConnectionService : IDisposable
             DiagnosticLog.Write("Connection test exceeded its time budget.");
             throw new TimeoutException("测试连接超过 30 秒，请检查网络或稍后重试。");
         }
+    }
+
+    private static long ReadModelCreated(JsonElement item)
+    {
+        if (item.TryGetProperty("created", out var created) && created.ValueKind == JsonValueKind.Number
+            && created.TryGetInt64(out long timestamp) && timestamp > 0 && timestamp <= 253402300799L) return timestamp;
+        if (item.TryGetProperty("created_at", out var date) && date.ValueKind == JsonValueKind.String
+            && DateTimeOffset.TryParse(date.GetString(), CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal, out var parsed) && parsed.ToUnixTimeSeconds() > 0) return parsed.ToUnixTimeSeconds();
+        return 0;
+    }
+
+    // No release date: use descending natural name order (model-10 before model-9).
+    private static int CompareModelNames(string? left, string? right)
+    {
+        string[] a = Regex.Split(left ?? "", "([0-9]+)"), b = Regex.Split(right ?? "", "([0-9]+)");
+        for (int i = 0; i < Math.Min(a.Length, b.Length); i++)
+        {
+            int comparison;
+            if (i % 2 == 1)
+            {
+                string x = a[i].TrimStart('0'), y = b[i].TrimStart('0');
+                comparison = x.Length.CompareTo(y.Length);
+                if (comparison == 0) comparison = string.CompareOrdinal(x, y);
+            }
+            else comparison = StringComparer.OrdinalIgnoreCase.Compare(a[i], b[i]);
+            if (comparison != 0) return comparison;
+        }
+        int length = a.Length.CompareTo(b.Length);
+        return length != 0 ? length : StringComparer.Ordinal.Compare(left, right);
     }
 
     private static Uri AddPagination(Uri endpoint, string? cursor)

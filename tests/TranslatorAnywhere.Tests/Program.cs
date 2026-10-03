@@ -24,6 +24,7 @@ internal static class Program
         try
         {
             CheckSettingsAndIcons(directory);
+            assertions += ThemePersistenceChecks.Run(directory);
             assertions += ButtonAppearanceChecks.Run(directory);
             CheckPlacement();
             assertions += StartupRegistrationChecks.Run();

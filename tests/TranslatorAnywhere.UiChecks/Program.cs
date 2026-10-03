@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,7 +21,7 @@ using TranslatorAnywhere.Native;
 using TranslatorAnywhere.Services;
 using TranslatorAnywhere.Views;
 
-internal static class Program
+internal static partial class Program
 {
     private static int assertions;
     private static string output = "";
@@ -30,7 +30,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        output = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v0.3.8"));
+        output = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v0.3.9"));
         Directory.CreateDirectory(output);
         Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", Path.Combine(output, "test-data"));
         app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
@@ -90,6 +90,21 @@ internal static class Program
         Save(window, "translation-short.png");
         await CheckCopyFeedbackAsync(window, snapshot);
 
+        var dismissBounds = DesktopInterop.GetWindowBounds(window);
+        var outside = new Point(dismissBounds.Left - 20, dismissBounds.Top - 20);
+        var pin = (ToggleButton)window.FindName("PinnedBox");
+        pin.IsChecked = false;
+        window.DismissIfOutside(new Point(dismissBounds.Left + dismissBounds.Width / 2, dismissBounds.Top + dismissBounds.Height / 2));
+        Check(window.IsVisible, "Clicking inside the translation keeps it visible");
+        pin.IsChecked = true;
+        window.DismissIfOutside(outside);
+        Check(window.IsVisible && window.Topmost, "Pinned translation survives an outside click");
+        pin.IsChecked = false;
+        Check(window.IsVisible, "Unpinning does not immediately hide the translation");
+        window.DismissIfOutside(outside);
+        Check(!window.IsVisible, "An outside click hides an unpinned translation");
+        window.ShowNearSelection(snapshot);
+
         settings.ActiveProviderId = secondProvider.Id;
         await window.TranslateSelectionAsync();
         Check(handler.LastKey == "second-fixture-key" && handler.LastModel == "other-fixture-model" && handler.LastHost == "api.openai.com", "Switching provider switches credentials and request destination together");
@@ -113,7 +128,7 @@ internal static class Program
         var pending = window.TranslateSelectionAsync();
         await Task.Delay(60);
         Check(((Button)window.FindName("CancelButton")).Visibility == Visibility.Visible, "Stop appears during request");
-        window.Hide();
+        window.DismissIfOutside(new Point(-100000, -100000));
         await pending;
         Check(handler.CancellationObserved, "Hiding popup cancels active request");
         handler.Block = false;
@@ -178,6 +193,7 @@ internal static class Program
         tabs.SelectedIndex = 0;
         await CheckAutomaticSavingAsync();
         await CheckRestoredDamagedConfigurationAsync();
+        await CheckThemesAsync(window);
         if (!preview) { settingsWindow.Close(); window.Hide(); service.Dispose(); }
         else
         {
@@ -253,16 +269,16 @@ internal static class Program
             Check(saved == 1 && store.Load().ButtonText == "自动保存", "A burst of text edits produces one durable automatic save");
 
             int before = saved;
-            ((ComboBox)window.FindName("ModeBox")).SelectedIndex = (int)ButtonVisualMode.Symbol;
-            ((Slider)window.FindName("SizeSlider")).Value = 44;
+            ((ListBox)window.FindName("ModeBox")).SelectedIndex = (int)ButtonVisualMode.Symbol;
+            ((ListBox)window.FindName("SizeChoice")).SelectedIndex = 2;
             ((TextBox)window.FindName("ColorBox")).Text = "#8A3FFC";
-            ((ComboBox)window.FindName("AnchorBox")).SelectedIndex = (int)ButtonAnchor.SelectionTopLeft;
+            ((ListBox)window.FindName("AnchorBox")).SelectedValue = ButtonAnchor.SelectionTopLeft.ToString();
             ((TextBox)window.FindName("OffsetXBox")).Text = "-16";
             ((TextBox)window.FindName("OffsetYBox")).Text = "18";
             await DrainAsync();
             Check(window.FlushPendingChanges(), "Valid appearance edits can be flushed synchronously");
             var persisted = store.Load();
-            Check(saved == before + 1 && persisted.ButtonMode == ButtonVisualMode.Symbol && persisted.ButtonSize == 44
+            Check(saved == before + 1 && persisted.ButtonMode == ButtonVisualMode.Symbol && persisted.ButtonSize == 40
                 && persisted.ButtonColor == "#8A3FFC"
                 && persisted.Anchor == ButtonAnchor.SelectionTopLeft && persisted.OffsetX == -16 && persisted.OffsetY == 18,
                 "One save commits appearance and placement together");
@@ -270,8 +286,8 @@ internal static class Program
                 "Symbol preview uses the shared Translate icon component");
 
             before = saved;
-            var transparency = (Slider)window.FindName("TransparencySlider");
-            Check(transparency.Value == 0 && persisted.ButtonTransparency == 0, "Floating buttons start with zero transparency");
+            var transparency = (ListBox)window.FindName("TransparencyChoice");
+            Check(transparency.SelectedIndex == 3 && persisted.ButtonTransparency == 0, "Floating buttons start with zero transparency");
             var previewTile = (Border)window.FindName("PreviewButton");
             var floatingButton = new SelectionButtonWindow();
             var work = DesktopInterop.GetWorkArea(DesktopInterop.Cursor);
@@ -279,9 +295,9 @@ internal static class Program
                 new Rect(work.Left + 80, work.Top + 80, 120, 20), new Point(work.Left + 200, work.Top + 100), "UI fixture", DateTimeOffset.Now);
             try
             {
-                foreach (double percentage in new[] { 0d, 50d, 100d })
+                foreach (double percentage in new[] { 0d, 25d, 50d, 75d })
                 {
-                    transparency.Value = percentage;
+                    transparency.SelectedIndex = 3 - (int)(percentage / 25);
                     floatingButton.ShowFor(selection, new AppSettings { ButtonMode = ButtonVisualMode.Symbol, ButtonTransparency = percentage });
                     await LayoutAsync(floatingButton);
                     var tile = (Border)floatingButton.FindName("Tile");
@@ -301,7 +317,7 @@ internal static class Program
                 }
             }
             finally { floatingButton.Close(); }
-            transparency.Value = 50;
+            transparency.SelectedIndex = 1;
             Check(window.FlushPendingChanges() && saved == before + 1 && store.Load().ButtonTransparency == 50,
                 "Transparency changes use the same durable automatic-save path");
             ((ScrollViewer)window.FindName("AppearanceScrollViewer")).ScrollToEnd();
@@ -315,7 +331,7 @@ internal static class Program
                 reopened.Show();
                 await LayoutAsync(reopened);
                 await Task.Delay(750);
-                Check(((Slider)reopened.FindName("TransparencySlider")).Value == 50
+                Check(((ListBox)reopened.FindName("TransparencyChoice")).SelectedIndex == 1
                     && Near(((Border)reopened.FindName("PreviewButton")).Opacity, .5) && reopenedWrites == 0,
                     "Reopening restores saved transparency without an initialization write");
             }
@@ -348,7 +364,7 @@ internal static class Program
             ((TextBox)window.FindName("DelayBox")).Text = "-";
             tabs.SelectedIndex = 0;
             await LayoutAsync(window);
-            ((ComboBox)window.FindName("ModeBox")).SelectedIndex = (int)ButtonVisualMode.Text;
+            ((ListBox)window.FindName("ModeBox")).SelectedIndex = (int)ButtonVisualMode.Text;
             label.Focus();
             await DrainAsync();
             var focused = System.Windows.Input.Keyboard.FocusedElement;
@@ -593,7 +609,7 @@ internal static class Program
     {
         var actions = FindAllVisual<ButtonBase>(window).Select(button => new { Button = button, Icon = ActionIcon(button) })
             .Where(action => action.Icon is not null).ToArray();
-        var expected = new[] { HugeIconKind.Pin, HugeIconKind.Settings, HugeIconKind.Close, HugeIconKind.Stop, HugeIconKind.Refresh, HugeIconKind.Copy };
+        var expected = new[] { HugeIconKind.Pin, HugeIconKind.Settings, HugeIconKind.Stop, HugeIconKind.Refresh, HugeIconKind.Copy };
         Check(actions.Select(action => action.Icon!.Kind).OrderBy(kind => kind).SequenceEqual(expected.OrderBy(kind => kind)),
             "All popup actions use shared vector icons instead of font glyphs or text labels");
         Check(actions.All(action => action.Button.ToolTip is string tooltip && !string.IsNullOrWhiteSpace(tooltip)
@@ -650,8 +666,7 @@ internal static class Program
         await LayoutAsync(window);
         ((Button)editor.FindName("CatalogBackButton")).Focus();
         Save(window, "providers-catalog.png");
-        ((TextBox)editor.FindName("CatalogSearchBox")).Text = "DeepSeek";
-        Check(((ItemsControl)editor.FindName("CatalogItems")).Items.Count == 1, "Catalogue searches provider names");
+        Check(((ItemsControl)editor.FindName("CatalogItems")).Items.Count == 7 && editor.FindName("CatalogSearchBox") is null, "Catalogue shows seven presets without search");
         ((Button)editor.FindName("CatalogBackButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Check(((FrameworkElement)editor.FindName("ListView")).IsVisible && editor.EditingProviderId is null,
             "The catalogue return action opens the provider list");

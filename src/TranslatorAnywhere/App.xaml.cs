@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,6 +21,7 @@ public partial class App : Application
     private bool _ownsMutex;
     private AppSettings _settings = new();
     private SettingsStore _store = null!;
+    private ThemeService? _theme;
     private TranslationService _translationService = null!;
     private SelectionCapture _capture = null!;
     private MouseMonitor _mouse = null!;
@@ -48,6 +49,10 @@ public partial class App : Application
         };
         if (e.Args.Contains("--fixture", StringComparer.OrdinalIgnoreCase))
         {
+            _store = new SettingsStore();
+            _settings = _store.Load();
+            _theme = new ThemeService(this);
+            _theme.Apply(_settings.Theme);
             ShutdownMode = ShutdownMode.OnMainWindowClose;
             MainWindow = new SelectionFixtureWindow();
             MainWindow.Show();
@@ -65,6 +70,9 @@ public partial class App : Application
         }
         _store = new SettingsStore();
         _settings = _store.Load();
+        _theme = new ThemeService(this);
+        _theme.Apply(_settings.Theme);
+        _theme.Changed += UpdateTrayTheme;
         var startup = StartupRegistration.GetStatus();
         if (_settings.LaunchAtStartup && startup.ReadSucceeded && startup.RequiresMigration)
         {
@@ -104,6 +112,7 @@ public partial class App : Application
         }
         _mouse = new MouseMonitor();
         _mouse.SelectionFinished += gesture => Dispatcher.BeginInvoke(() => CaptureGesture(gesture, false));
+        _mouse.AnyPointerPressed += point => Dispatcher.BeginInvoke(() => _translation.DismissIfOutside(point));
         _mouse.PointerPressed += point => Dispatcher.BeginInvoke(() =>
         {
             // Keep the cached selection alive for the non-activating button's click.
@@ -206,6 +215,7 @@ public partial class App : Application
                     || settings.ActiveProviderId is Guid activeId && pendingApiKeys.ContainsKey(activeId);
                 _store.SaveConfiguration(settings, pendingApiKeys);
                 _settings = settings;
+                _theme!.Apply(settings.Theme);
                 if (translationChanged) _translation.Cancel();
                 UpdateTray();
                 InvalidateSelection(); HideButton();
@@ -286,8 +296,24 @@ public partial class App : Application
             Shutdown();
         }));
         _tray = new Forms.NotifyIcon { Text = "Anywhere Translator", Icon = AppIconService.LoadTrayIcon(_store.DataDirectory), ContextMenuStrip = menu, Visible = true };
+        UpdateTrayTheme();
         _tray.DoubleClick += (_, _) => Dispatcher.BeginInvoke(ShowSettings);
         UpdateTray();
+    }
+
+    private void UpdateTrayTheme()
+    {
+        if (_tray?.ContextMenuStrip is not { } menu) return;
+        System.Drawing.Color Color(string key)
+        {
+            var color = ((System.Windows.Media.SolidColorBrush)FindResource(key)).Color;
+            return System.Drawing.Color.FromArgb(color.R, color.G, color.B);
+        }
+        menu.BackColor = Color("SurfaceBrush");
+        menu.ForeColor = Color("InkBrush");
+        foreach (Forms.ToolStripItem item in menu.Items) item.ForeColor = menu.ForeColor;
+        menu.Renderer = new Forms.ToolStripProfessionalRenderer(new TrayThemeColors(menu.BackColor, Color("AccentLightBrush"), Color("DividerBrush")));
+        menu.Invalidate();
     }
 
     private void UpdateTray()
@@ -309,6 +335,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _buttonTimer.Stop();
+        _theme?.Dispose();
         InvalidateSelection();
         _mouse?.Dispose();
         _shortcut?.Dispose();

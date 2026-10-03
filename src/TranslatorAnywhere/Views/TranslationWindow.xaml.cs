@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -229,7 +229,7 @@ public partial class TranslationWindow : Window
     {
         RequestStatusLabel.Text = error ? "翻译未完成" : text;
         RequestStatusLabel.ToolTip = string.IsNullOrEmpty(_requestSource) ? text : text + "\n" + _requestSource;
-        RequestStatusLabel.Foreground = (Brush)FindResource(error ? "ErrorBrush" : "MutedBrush");
+        RequestStatusLabel.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, error ? "ErrorBrush" : "MutedBrush");
         ErrorDetailLabel.Text = error ? text : "";
         ErrorDetailLabel.Visibility = error ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -237,7 +237,11 @@ public partial class TranslationWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e) => SettingsRequested?.Invoke();
     private async void Retry_Click(object sender, RoutedEventArgs e) => await TranslateSelectionAsync();
     private void Cancel_Click(object sender, RoutedEventArgs e) => Cancel();
-    private void Close_Click(object sender, RoutedEventArgs e) => Hide();
+    public void DismissIfOutside(Point screenPoint)
+    {
+        if (!IsVisible || PinnedBox.IsChecked == true) return;
+        if (!DesktopInterop.GetWindowBounds(this).Contains(screenPoint)) Hide();
+    }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {

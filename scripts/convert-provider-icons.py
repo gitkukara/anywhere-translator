@@ -13,6 +13,9 @@ ET.register_namespace("x", XAML)
 def tag(name):
     return f"{{{WPF}}}{name}"
 
+def coordinate(value):
+    return str(float(value[:-1]) / 100) if value.endswith("%") else value
+
 resources = ET.Element(tag("ResourceDictionary"))
 for file in sorted(SOURCE.glob("*.svg")):
     svg = ET.parse(file).getroot()
@@ -34,15 +37,15 @@ for file in sorted(SOURCE.glob("*.svg")):
             brush_prop = ET.SubElement(geometry, tag("GeometryDrawing.Brush"))
             brush = ET.SubElement(brush_prop, tag("LinearGradientBrush"), {
                 "MappingMode": "Absolute" if source.attrib.get("gradientUnits") == "userSpaceOnUse" else "RelativeToBoundingBox",
-                "StartPoint": source.attrib.get("x1", "0") + "," + source.attrib.get("y1", "0"),
-                "EndPoint": source.attrib.get("x2", "1") + "," + source.attrib.get("y2", "0"),
+                "StartPoint": coordinate(source.attrib.get("x1", "0")) + "," + coordinate(source.attrib.get("y1", "0")),
+                "EndPoint": coordinate(source.attrib.get("x2", "1")) + "," + coordinate(source.attrib.get("y2", "0")),
             })
             for stop in source:
                 color = stop.attrib["stop-color"].lstrip("#")
                 if len(color) == 3:
                     color = "".join(letter * 2 for letter in color)
                 alpha = round(float(stop.attrib.get("stop-opacity", "1")) * 255)
-                ET.SubElement(brush, tag("GradientStop"), {"Color": f"#{alpha:02X}" + color, "Offset": stop.attrib.get("offset", "0")})
+                ET.SubElement(brush, tag("GradientStop"), {"Color": f"#{alpha:02X}" + color, "Offset": coordinate(stop.attrib.get("offset", "0"))})
         else:
             geometry.set("Brush", "{DynamicResource InkBrush}" if fill == "currentColor" else fill)
 ET.indent(resources, space="    ")

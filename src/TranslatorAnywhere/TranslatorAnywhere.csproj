@@ -10,7 +10,7 @@
     <ApplicationIcon>Assets/app.ico</ApplicationIcon>
     <AssemblyName>TranslatorAnywhere</AssemblyName>
     <RootNamespace>TranslatorAnywhere</RootNamespace>
-    <Version>0.3.8</Version>
+    <Version>0.3.9</Version>
     <!-- WPF owns PerMonitorV2 awareness; WinForms is used only for the tray icon. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>

@@ -22,6 +22,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。
 
 **使用演示（视频由AI制作，实际体验更丝滑）：**
+
 [![15 秒操作示意，使用模拟译文](docs/demo/usage.gif)](https://github.com/gitkukara/anywhere-translator/releases/download/v1.0.0/Anywhere-Translator-demo.mp4)
 
 ## 更新

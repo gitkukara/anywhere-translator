@@ -2,7 +2,7 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-[下载 v1.1.1](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.1) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
+[下载 v1.1.2](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.2) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
 <img src="docs/screenshots/appearance.png" alt="浅色外观设置" width="360" />
 

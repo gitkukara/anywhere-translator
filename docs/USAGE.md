@@ -1,10 +1,10 @@
 # Anywhere Translator
 
-Windows 桌面划词翻译工具，当前版本为 1.1.1。
+Windows 桌面划词翻译工具，当前版本为 1.1.2。
 
 鼠标拖选或双击文字后，在选区旁显示按钮。点击按钮打开翻译窗口，并通过用户配置的 AI API 返回译文。程序独立运行，无需浏览器扩展。
 
-[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [v1.1.1 发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
+[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [v1.1.2 发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
 
 <img src="screenshots/appearance.png" alt="浅色外观设置" width="360" />
 
@@ -14,7 +14,7 @@ Windows 桌面划词翻译工具，当前版本为 1.1.1。
 
 运行环境为 Windows x64。正式发布的完整便携版已内置 .NET 10 Desktop Runtime，解压即可运行，无需另外安装 .NET。
 
-在 [Releases](https://github.com/gitkukara/anywhere-translator/releases) 下载 `TranslatorAnywhere-v1.1.1-win-x64.zip`，完整解压到可写入的目录，然后运行 `TranslatorAnywhere.exe`。EXE、DLL、JSON 和随附文档应保存在一起。程序使用便携目录保存配置，首次运行需自行配置 API 服务和密钥。
+在 [Releases](https://github.com/gitkukara/anywhere-translator/releases) 下载 `TranslatorAnywhere-v1.1.2-win-x64.zip`，完整解压到可写入的目录，然后运行 `TranslatorAnywhere.exe`。EXE、DLL、JSON 和随附文档应保存在一起。程序使用便携目录保存配置，首次运行需自行配置 API 服务和密钥。
 
 GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开发步骤见下方“开发与构建”。
 

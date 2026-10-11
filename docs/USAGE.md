@@ -1,6 +1,6 @@
 # Anywhere Translator
 
-Windows 桌面划词翻译工具，当前源码和本地构建为 1.2.5，GitHub 下载版仍为 1.1.3。
+Windows 桌面划词翻译工具，当前源码和本地构建为 1.3.0，GitHub 下载版仍为 1.1.3。
 
 鼠标拖选或双击文字后，在选区旁显示按钮。点击按钮打开翻译窗口，并通过用户配置的 AI API 返回译文。程序独立运行，无需浏览器扩展。
 
@@ -14,7 +14,7 @@ Windows 桌面划词翻译工具，当前源码和本地构建为 1.2.5，GitHub
 
 运行环境为 Windows x64。v1.2.5 起采用单文件 EXE，不内置 .NET；请安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。公式排版还需要 Microsoft Edge WebView2 Runtime。已经安装运行时的电脑无需重复安装。
 
-当前本地构建生成 `Anywhere-Translator-v1.2.5-win-x64.exe`，无需解压或随附 DLL、脚本、字体。放到可写入的固定目录后运行；可改名为 `Anywhere Translator.exe`。程序在旁边的 `data` 文件夹保存配置，首次运行需配置 API 服务和密钥。运行 `Anywhere Translator.exe` 时会自动创建当前用户的开始菜单快捷方式；移动目录后再次运行即可更新入口。删除程序目录后，可在 `Win+R` 输入 `shell:programs`，删除对应快捷方式。[Releases](https://github.com/gitkukara/anywhere-translator/releases) 目前仍为 v1.1.3 旧版 ZIP，旧版需要完整解压并保留随附文件。
+当前本地构建生成 `Anywhere-Translator-v1.3.0-win-x64.exe`，无需解压或随附 DLL、脚本、字体。放到可写入的固定目录后运行；可改名为 `Anywhere Translator.exe`。程序在旁边的 `data` 文件夹保存配置，首次运行需配置 API 服务和密钥。运行 `Anywhere Translator.exe` 时会自动创建当前用户的开始菜单快捷方式；移动目录后再次运行即可更新入口。删除程序目录后，可在 `Win+R` 输入 `shell:programs`，删除对应快捷方式。[Releases](https://github.com/gitkukara/anywhere-translator/releases) 目前仍为 v1.1.3 旧版 ZIP，旧版需要完整解压并保留随附文件。
 
 GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开发步骤见下方“开发与构建”。
 
@@ -26,6 +26,8 @@ GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开�
 4. “外观”右下角的“点这里预览测试”会打开独立文本窗口，验证实际按钮样式、位置和取词交互。
 
 ## 设置界面与后台运行
+
+“外观”顶部提供“语言”分段选择：跟随系统／English／中文，选中后立即应用并保存，无需重启。跟随系统时，中文系统显示中文，其他系统语言显示英文。设置、服务管理、托盘菜单及翻译浮窗的提示会一起更新；翻译目标语言、服务配置、模型名、自定义按钮文字和用户命名保留原值。英文入口为 **Appearance → Language**。
 
 “其他设置”页底部显示当前程序的版本号，升级后随程序自动更新。
 

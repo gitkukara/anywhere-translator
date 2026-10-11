@@ -2,7 +2,9 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-当前源码和本地构建为 v1.2.5，采用不内置 .NET 的单文件 EXE，支持 Markdown / LaTeX 公式排版、透明 PNG / SVG 浮动图标和最近三个导入图标的快速切换；下方下载链接仍指向已发布的 v1.1.3 旧版 ZIP。
+当前源码和本地构建为 v1.3.0，支持中文／English 界面与即时切换，采用不内置 .NET 的单文件 EXE；下方下载链接仍指向已发布的 v1.1.3 旧版 ZIP。
+
+English UI is available in **Appearance → Language → English**. System mode uses Chinese for Chinese system languages and English otherwise. Install .NET 10 Desktop Runtime (x64), run the EXE, then add your provider and API key in **Translation**.
 
 [下载 v1.1.3](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.3) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
@@ -12,6 +14,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 - 支持多种 API 接入： DeepSeek、智谱 GLM、小米 MiMo、千问 Qwen、OpenAI、Gemini ，还可自定义接口，API Key 在本机加密保存；
 - 支持界面浅色、深色及跟随系统；
+- 界面语言支持跟随系统、English、中文，立即生效并自动保存；与翻译目标语言独立。
 - 译文支持 Markdown 与 LaTeX 数学公式排版，适合论文阅读；
 - 支持自定义翻译按钮的样式与出现位置；
 - 支持开机自启动；
@@ -20,13 +23,15 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 ## 使用
 
 1. 安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) 和 Microsoft Edge WebView2 Runtime，然后运行 Windows x64 单文件 EXE。已有运行时的电脑无需重复安装。
-   本地生成的下载文件名为 `Anywhere-Translator-v1.2.5-win-x64.exe`，可改名为 `Anywhere Translator.exe` 后放到可写入的固定目录；旧版 v1.1.3 下载仍需完整解压。
+   本地生成的下载文件名为 `Anywhere-Translator-v1.3.0-win-x64.exe`，可改名为 `Anywhere Translator.exe` 后放到可写入的固定目录；旧版 v1.1.3 下载仍需完整解压。
    首次运行会自动添加开始菜单快捷方式，可搜索 `Anywhere Translator`；移动目录后再次运行即可更新入口。
 2. 在“翻译服务”添加供应商，填写 API Key，刷新并选择模型，测试连接后设为当前服务。
 3. 在其他应用中拖选文字，点击选区附近出现的按钮，弹出浮窗显示翻译；也可选中文字后按 `Ctrl+Alt+T`。
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。
 
 在“外观”中切换界面主题、调整按钮样式和位置；右下角“点这里预览测试”可打开测试文字窗口。
+
+“外观”顶部的“语言”采用分段按钮：跟随系统／English／中文。切换后设置、服务管理、托盘和翻译浮窗提示立即更新，无需重启。中文系统使用中文，其余系统语言使用英文；已有的翻译目标语言、模型和自定义文字不会随界面语言改变。
 
 “其他设置”页底部可查看当前程序版本号。
 

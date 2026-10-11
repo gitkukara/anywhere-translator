@@ -1,8 +1,8 @@
-﻿<Window x:Class="TranslatorAnywhere.Views.TranslationWindow"
+<Window x:Class="TranslatorAnywhere.Views.TranslationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:TranslatorAnywhere.Views"
-        Title="划词翻译" Width="400" SizeToContent="Height" MinHeight="168"
+        Title="{DynamicResource Ui.3b02edcd404ddddc}" Width="400" SizeToContent="Height" MinHeight="168"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent" ResizeMode="NoResize"
         ShowInTaskbar="False" WindowStartupLocation="Manual"
         Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" PreviewKeyDown="Window_PreviewKeyDown"
@@ -19,10 +19,10 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsHitTestVisible="False">
                         <views:HugeIcon Kind="Translate" Width="18" Height="18" Foreground="{DynamicResource AccentBrush}" Margin="0,0,9,0" />
-                        <TextBlock x:Name="LanguageLabel" Text="简体中文" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" MaxWidth="160" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="LanguageLabel" Text="{DynamicResource Ui.9937e365aaf3a085}" FontSize="12" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" MaxWidth="160" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                     <ToggleButton x:Name="PinnedBox" Grid.Column="1" Width="28" Height="28" Margin="0,0,2,0"
-                                  ToolTip="钉住：保持显示并置顶" AutomationProperties.Name="钉住窗口" Checked="Pinned_Changed" Unchecked="Pinned_Changed" Cursor="Hand" FocusVisualStyle="{x:Null}">
+                                  ToolTip="{DynamicResource Ui.32741f46b35d9ab3}" AutomationProperties.Name="{DynamicResource Ui.245d75833069e7f0}" Checked="Pinned_Changed" Unchecked="Pinned_Changed" Cursor="Hand" FocusVisualStyle="{x:Null}">
                         <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
                             <Border x:Name="PinChrome" Background="Transparent" CornerRadius="5" BorderThickness="1" BorderBrush="Transparent">
                                 <views:HugeIcon x:Name="PinIcon" Kind="Pin" Width="18" Height="18" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -33,7 +33,7 @@
                             </ControlTemplate.Triggers>
                         </ControlTemplate></ToggleButton.Template>
                     </ToggleButton>
-                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="设置" AutomationProperties.Name="设置">
+                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Ui.df3d58c7d84b85f2}" AutomationProperties.Name="{DynamicResource Ui.df3d58c7d84b85f2}">
                         <views:HugeIcon Kind="Settings" Width="18" Height="18" Foreground="{DynamicResource MutedBrush}" />
                     </Button>
                 </Grid>
@@ -45,25 +45,25 @@
                              MaxHeight="360" BorderThickness="0" Padding="0" Background="Transparent" FontSize="15"
                              Foreground="{DynamicResource InkBrush}"
                              FontFamily="Microsoft YaHei UI, Segoe UI" TextBlock.LineHeight="24" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch"
-                             AutomationProperties.Name="译文" />
+                             AutomationProperties.Name="{DynamicResource Ui.80461c2decc549dc}" />
                     <StackPanel x:Name="EmptyResultPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,8">
-                        <TextBlock x:Name="EmptyResultLabel" Text="准备翻译" FontSize="13" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" />
-                        <Button x:Name="ConfigureButton" Content="配置翻译服务" Style="{StaticResource SubtleButton}" Click="Settings_Click" Margin="0,8,0,0" Visibility="Collapsed" />
+                        <TextBlock x:Name="EmptyResultLabel" Text="{DynamicResource Ui.ce77b9bb406e7fa4}" FontSize="13" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" />
+                        <Button x:Name="ConfigureButton" Content="{DynamicResource Ui.cb1ec474f33b90bd}" Style="{StaticResource SubtleButton}" Click="Settings_Click" Margin="0,8,0,0" Visibility="Collapsed" />
                     </StackPanel>
                 </Grid>
                 <TextBlock x:Name="ErrorDetailLabel" Grid.Row="3" Visibility="Collapsed" Margin="16,0,16,10" FontSize="12" LineHeight="18"
                            Foreground="{DynamicResource ErrorBrush}" TextWrapping="Wrap" MaxHeight="90" TextTrimming="CharacterEllipsis" />
                 <Border Grid.Row="4" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Padding="14,3,8,3">
                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <TextBlock x:Name="RequestStatusLabel" Text="准备翻译" Foreground="{DynamicResource MutedBrush}" FontSize="12"
+                        <TextBlock x:Name="RequestStatusLabel" Text="{DynamicResource Ui.ce77b9bb406e7fa4}" Foreground="{DynamicResource MutedBrush}" FontSize="12"
                                    TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource IconButton}" Click="Cancel_Click" Visibility="Collapsed" ToolTip="停止翻译" AutomationProperties.Name="停止翻译">
+                        <Button x:Name="CancelButton" Grid.Column="1" Style="{StaticResource IconButton}" Click="Cancel_Click" Visibility="Collapsed" ToolTip="{DynamicResource Ui.e26aeac640fedafd}" AutomationProperties.Name="{DynamicResource Ui.e26aeac640fedafd}">
                             <views:HugeIcon Kind="Stop" Width="18" Height="18" Foreground="{DynamicResource MutedBrush}" />
                         </Button>
-                        <Button x:Name="RetryButton" Grid.Column="2" Style="{StaticResource IconButton}" Click="Retry_Click" ToolTip="重新翻译" AutomationProperties.Name="重新翻译" Margin="0,0,3,0">
+                        <Button x:Name="RetryButton" Grid.Column="2" Style="{StaticResource IconButton}" Click="Retry_Click" ToolTip="{DynamicResource Ui.496b5f088e5b9bbf}" AutomationProperties.Name="{DynamicResource Ui.496b5f088e5b9bbf}" Margin="0,0,3,0">
                             <views:HugeIcon Kind="Refresh" Width="18" Height="18" Foreground="{DynamicResource MutedBrush}" />
                         </Button>
-                        <Button x:Name="CopyButton" Grid.Column="3" Style="{StaticResource IconButton}" Click="Copy_Click" IsEnabled="False" ToolTip="复制译文" AutomationProperties.Name="复制译文">
+                        <Button x:Name="CopyButton" Grid.Column="3" Style="{StaticResource IconButton}" Click="Copy_Click" IsEnabled="False" ToolTip="{DynamicResource Ui.032eb48c7a431ec0}" AutomationProperties.Name="{DynamicResource Ui.032eb48c7a431ec0}">
                             <Grid Width="18" Height="18">
                                 <views:HugeIcon x:Name="CopyIcon" Kind="Copy" Width="18" Height="18" Foreground="{DynamicResource MutedBrush}" />
                                 <views:HugeIcon x:Name="CopySuccessIcon" Kind="Check" Width="18" Height="18" Foreground="{DynamicResource AccentBrush}" Visibility="Collapsed" />

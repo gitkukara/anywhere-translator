@@ -86,6 +86,9 @@
     const scroll = document.scrollingElement || document.documentElement;
     const oldOffset = scroll.scrollTop;
     revision = message.revision;
+    const english = message.uiLanguage === 'en';
+    document.documentElement.lang = english ? 'en' : 'zh-CN';
+    article.setAttribute('aria-label', english ? 'Translation' : '译文');
     const palette = message.palette || {};
     for (const name of ['ink', 'surface', 'muted', 'divider', 'accent', 'selection'])
       if (/^#[0-9a-f]{6}$/i.test(palette[name])) document.documentElement.style.setProperty('--' + name, palette[name]);
@@ -105,7 +108,7 @@
         } catch {
           element.classList.add('math-error');
           element.textContent = tex;
-          element.title = '公式暂时无法排版，已保留 LaTeX 原文';
+          element.title = english ? 'Cannot render this formula. The original LaTeX is preserved.' : '公式暂时无法排版，已保留 LaTeX 原文';
         }
       }
       for (const table of article.querySelectorAll('table')) {

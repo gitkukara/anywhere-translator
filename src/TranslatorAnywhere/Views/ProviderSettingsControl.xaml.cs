@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,7 +61,9 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
 
     public ProviderSettingsControl()
     {
+        UiText.EnsureInitialized();
         InitializeComponent();
+        UiText.Changed += RefreshLanguage;
         SelectedModelCombo.AddHandler(TextBoxBase.TextChangedEvent, new TextChangedEventHandler(SelectedModel_TextChanged), true);
         _statusTimer.Tick += (_, _) => ClearStatus();
     }
@@ -123,7 +125,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     {
         if (_providers.Count >= 100) throw new ArgumentException("最多可以添加 100 个服务。");
         var provider = ProviderRegistry.CreateProvider(presetId);
-        if (provider.PresetId == "custom") provider.Name = "自定义接口";
+        provider.Name = UiText.T(provider.PresetId == "custom" ? "自定义接口" : provider.Name);
         _providers.Add(provider);
         _originalKeys[provider.Id] = "";
         OpenProvider(provider.Id);
@@ -191,36 +193,36 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
             content.ColumnDefinitions.Add(new ColumnDefinition());
             content.Children.Add(CreateLogo(provider.PresetId));
             var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
-            text.Children.Add(Themed(new TextBlock { Text = provider.Name.Length > 0 ? provider.Name : "未命名服务", FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "InkBrush"));
-            text.Children.Add(Themed(new TextBlock { Text = Host(provider.BaseUrl) + "  ·  " + provider.Models.Count + " 个模型", FontSize = 12, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "MutedBrush"));
-            string model = provider.SelectedModel.Length > 0 ? provider.SelectedModel : "未选择模型";
+            text.Children.Add(Themed(new TextBlock { Text = provider.Name.Length > 0 ? DisplayProviderName(provider) : UiText.T("未命名服务"), FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "InkBrush"));
+            text.Children.Add(Themed(new TextBlock { Text = UiText.T(Host(provider.BaseUrl) + "  ·  " + provider.Models.Count + " 个模型"), FontSize = 12, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis }, TextBlock.ForegroundProperty, "MutedBrush"));
+            string model = provider.SelectedModel.Length > 0 ? provider.SelectedModel : UiText.T("未选择模型");
             string providerKey = GetKey(provider.Id);
             string credential = _unreadableKeys.Contains(provider.Id) ? "密钥需重新填写" : providerKey.Length > 0 ? "已配置密钥" : provider.RequiresApiKey ? "未配置密钥" : "本机服务";
-            var detail = new TextBlock { Text = model + "  ·  " + credential + (_tested.Contains(provider.Id) ? "  ·  测试通过" : ""), FontSize = 11, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis };
+            var detail = new TextBlock { Text = model + "  ·  " + UiText.T(credential) + (_tested.Contains(provider.Id) ? "  ·  " + UiText.T("测试通过") : ""), FontSize = 11, Margin = new Thickness(0, 3, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis };
             detail.SetResourceReference(TextBlock.ForegroundProperty, "MutedBrush");
             text.Children.Add(detail);
             Grid.SetColumn(text, 1);
             content.Children.Add(text);
-            var open = new Button { Content = content, Style = (Style)FindResource("ProviderRowButton"), HorizontalContentAlignment = HorizontalAlignment.Stretch, MinHeight = 54, ToolTip = "编辑“" + provider.Name + "”" };
+            var open = new Button { Content = content, Style = (Style)FindResource("ProviderRowButton"), HorizontalContentAlignment = HorizontalAlignment.Stretch, MinHeight = 54, ToolTip = UiText.T("编辑“" + provider.Name + "”") };
             open.Click += (_, _) => OpenProvider(provider.Id);
             row.Children.Add(open);
             bool current = _activeId == provider.Id;
-            var use = new Button { Content = current ? "当前服务" : "使用", MinWidth = 74, Style = (Style)FindResource("SubtleButton"), Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 9, 0), ToolTip = current ? "当前翻译服务" : "设为当前翻译服务", IsEnabled = provider.Enabled || current };
+            var use = new Button { Content = UiText.T(current ? "当前服务" : "使用"), MinWidth = 74, Style = (Style)FindResource("SubtleButton"), Background = Brushes.Transparent, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(5, 0, 9, 0), ToolTip = UiText.T(current ? "当前翻译服务" : "设为当前翻译服务"), IsEnabled = provider.Enabled || current };
             if (current) use.SetResourceReference(Control.BackgroundProperty, "AccentLightBrush");
             use.SetResourceReference(Control.ForegroundProperty, current ? "AccentBrush" : "MutedBrush");
             use.Click += (_, _) => { try { ActivateProvider(provider.Id); } catch (ArgumentException ex) { SetStatus(ex.Message, true); } };
             Grid.SetColumn(use, 1);
             row.Children.Add(use);
-            var enabled = new CheckBox { Style = (Style)FindResource("SwitchBar"), IsChecked = provider.Enabled, VerticalAlignment = VerticalAlignment.Center, ToolTip = "启用或停用这个服务", Margin = new Thickness(0, 0, 1, 0) };
+            var enabled = new CheckBox { Style = (Style)FindResource("SwitchBar"), IsChecked = provider.Enabled, VerticalAlignment = VerticalAlignment.Center, ToolTip = UiText.T("启用或停用这个服务"), Margin = new Thickness(0, 0, 1, 0) };
             enabled.Checked += (_, _) => SetProviderEnabled(provider, true);
             enabled.Unchecked += (_, _) => SetProviderEnabled(provider, false);
             Grid.SetColumn(enabled, 2);
             row.Children.Add(enabled);
-            var chevron = new Button { Style = (Style)FindResource("IconButton"), VerticalAlignment = VerticalAlignment.Center, ToolTip = "编辑服务" };
+            var chevron = new Button { Style = (Style)FindResource("IconButton"), VerticalAlignment = VerticalAlignment.Center, ToolTip = UiText.T("编辑服务") };
             var chevronIcon = new HugeIcon { Kind = HugeIconKind.ChevronRight, Width = 16, Height = 16, IsHitTestVisible = false };
             chevronIcon.SetBinding(HugeIcon.ForegroundProperty, new Binding(nameof(Button.Foreground)) { Source = chevron });
             chevron.Content = chevronIcon;
-            System.Windows.Automation.AutomationProperties.SetName(chevron, "编辑服务");
+            UiText.Set(chevron, System.Windows.Automation.AutomationProperties.NameProperty, "编辑服务");
             chevron.Click += (_, _) => OpenProvider(provider.Id);
             Grid.SetColumn(chevron, 3);
             row.Children.Add(chevron);
@@ -249,7 +251,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     private void RefreshCatalog()
     {
         var entries = ProviderRegistry.AllPresets
-            .Select(p => new PresetEntry(p.Id, p.Id == "custom" ? "自定义接口" : p.Name, p.Category, TryFindResource("ProviderIcon." + p.Id) as ImageSource, Accent(p.AccentColor))).ToArray();
+            .Select(p => new PresetEntry(p.Id, UiText.T(p.Id == "custom" ? "自定义接口" : p.Name), UiText.T(p.Category), TryFindResource("ProviderIcon." + p.Id) as ImageSource, Accent(p.AccentColor))).ToArray();
         CatalogItems.ItemsSource = entries;
     }
 
@@ -260,7 +262,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         _loadingEditor = true;
         try
         {
-            DetailTitle.Text = p.Name;
+            DetailTitle.Text = DisplayProviderName(p);
             DetailLogo.Source = TryFindResource("ProviderIcon." + p.PresetId) as ImageSource;
             DetailLogo.Visibility = DetailLogo.Source is null ? Visibility.Collapsed : Visibility.Visible;
             ProviderNameBox.Text = p.Name;
@@ -270,7 +272,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
             ProviderApiKeyBox.Password = GetKey(p.Id);
             ModelListBox.Text = string.Join(Environment.NewLine, p.Models);
             ModelListPanel.Visibility = Visibility.Collapsed;
-            ModelListToggleLabel.Text = "管理模型列表";
+            UiText.Set(ModelListToggleLabel, System.Windows.Controls.TextBlock.TextProperty, "管理模型列表");
             ModelListToggleIcon.Kind = HugeIconKind.ChevronRight;
             SelectedModelCombo.ItemsSource = p.Models.ToArray();
             SelectedModelCombo.Text = p.SelectedModel;
@@ -298,7 +300,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         p.SelectedModel = selected;
         p.Enabled = ProviderEnabledCheck.IsChecked == true;
         p.DisableThinking = ProviderThinkingCheck.IsChecked == true;
-        DetailTitle.Text = p.Name;
+        DetailTitle.Text = DisplayProviderName(p);
         UpdateCredentialHint();
         UpdateActiveButton();
     }
@@ -306,7 +308,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     private void UpdateCredentialHint()
     {
         if (_editing is not { } p) return;
-        CredentialHint.Text = _unreadableKeys.Contains(p.Id) ? "密钥需重新填写。" : !p.RequiresApiKey ? "本机服务可留空。" : "";
+        UiText.Set(CredentialHint, System.Windows.Controls.TextBlock.TextProperty, _unreadableKeys.Contains(p.Id) ? "密钥需重新填写。" : !p.RequiresApiKey ? "本机服务可留空。" : "");
         CredentialHint.Visibility = CredentialHint.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
@@ -314,7 +316,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     {
         if (_editing is null) return;
         bool current = _activeId == _editing.Id;
-        UseProviderButton.Content = current ? "当前服务" : "设为当前服务";
+        UiText.Set(UseProviderButton, ContentControl.ContentProperty, current ? "当前服务" : "设为当前服务");
         UseProviderButton.SetResourceReference(Control.ForegroundProperty, current ? "AccentBrush" : "InkBrush");
         UseProviderButton.IsEnabled = _operation is null && (_editing.Enabled || current);
     }
@@ -391,7 +393,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     {
         bool expand = ModelListPanel.Visibility != Visibility.Visible;
         ModelListPanel.Visibility = expand ? Visibility.Visible : Visibility.Collapsed;
-        ModelListToggleLabel.Text = expand ? "收起模型列表" : "管理模型列表";
+        UiText.Set(ModelListToggleLabel, System.Windows.Controls.TextBlock.TextProperty, expand ? "收起模型列表" : "管理模型列表");
         ModelListToggleIcon.Kind = expand ? HugeIconKind.ChevronLeft : HugeIconKind.ChevronRight;
     }
     private void SelectedModel_LostFocus(object sender, KeyboardFocusChangedEventArgs e)
@@ -553,8 +555,8 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     private void SetStatus(string text, bool error = false, bool persistent = false)
     {
         _statusTimer.Stop();
-        ProviderStatusLabel.Text = text;
-        ProviderStatusLabel.ToolTip = text;
+        UiText.Set(ProviderStatusLabel, System.Windows.Controls.TextBlock.TextProperty, text);
+        UiText.Set(ProviderStatusLabel, FrameworkElement.ToolTipProperty, text);
         ProviderStatusLabel.SetResourceReference(TextBlock.ForegroundProperty, error ? "ErrorBrush" : "MutedBrush");
         ProviderStatusLabel.Visibility = Visibility.Visible;
         if (!error && !persistent) _statusTimer.Start();
@@ -562,7 +564,7 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
     private void ClearStatus()
     {
         _statusTimer.Stop();
-        ProviderStatusLabel.Text = "";
+        UiText.Set(ProviderStatusLabel, System.Windows.Controls.TextBlock.TextProperty, "");
         ProviderStatusLabel.ToolTip = null;
         ProviderStatusLabel.Visibility = Visibility.Collapsed;
     }
@@ -587,13 +589,29 @@ public partial class ProviderSettingsControl : UserControl, IDisposable
         try { return new SolidColorBrush((Color)ColorConverter.ConvertFromString(color ?? "#667988")); }
         catch { return Brush("MutedBrush"); }
     }
-    private static string Host(string address) => Uri.TryCreate(address, UriKind.Absolute, out var uri) ? uri.Authority : "尚未填写 API 地址";
+    private static string Host(string address) => Uri.TryCreate(address, UriKind.Absolute, out var uri) ? uri.Authority : UiText.T("尚未填写 API 地址");
     private static List<string> ParseModels(string text) => text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.Ordinal).ToList();
+    private static string DisplayProviderName(ProviderConfiguration provider)
+    {
+        var preset = ProviderRegistry.AllPresets.FirstOrDefault(item => item.Id == provider.PresetId);
+        return provider.Name == preset?.Name || provider.PresetId == "custom" && provider.Name == "自定义接口"
+            ? UiText.T(provider.Name) : provider.Name;
+    }
+
+    private void RefreshLanguage()
+    {
+        if (_disposed) return;
+        RenderList();
+        RefreshCatalog();
+        if (_editing is not null) DetailTitle.Text = DisplayProviderName(_editing);
+    }
+
     private static ProviderConfiguration Clone(ProviderConfiguration provider) => JsonSerializer.Deserialize<ProviderConfiguration>(JsonSerializer.Serialize(provider))!;
     private sealed record PresetEntry(string Id, string Name, string Description, ImageSource? Icon, Brush Accent);
     private void Control_Unloaded(object sender, RoutedEventArgs e) { CancelOperation(); ClearStatus(); }
     public void Dispose()
     {
+        UiText.Changed -= RefreshLanguage;
         if (_disposed) return;
         CancelOperation();
         ClearStatus();

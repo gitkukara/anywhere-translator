@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -39,6 +39,7 @@ public partial class TranslationWindow : Window
         _service = service;
         _settings = settings;
         _apiKey = apiKey;
+        UiText.EnsureInitialized();
         InitializeComponent();
         ResultTextBox.ActionRequested += action =>
         {
@@ -57,10 +58,10 @@ public partial class TranslationWindow : Window
         _selection = snapshot;
         _requestSource = "";
         ResultTextBox.Clear();
-        LanguageLabel.Text = _settings().TargetLanguage;
-        LanguageLabel.ToolTip = _settings().TargetLanguage;
+        UiText.Set(LanguageLabel, System.Windows.Controls.TextBlock.TextProperty, _settings().TargetLanguage);
+        UiText.Set(LanguageLabel, FrameworkElement.ToolTipProperty, _settings().TargetLanguage);
         EmptyResultPanel.Visibility = Visibility.Visible;
-        EmptyResultLabel.Text = "准备翻译";
+        UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "准备翻译");
         ConfigureButton.Visibility = Visibility.Collapsed;
         CopyButton.IsEnabled = false;
         SetStatus("准备翻译", false);
@@ -139,8 +140,8 @@ public partial class TranslationWindow : Window
         ResultTextBox.Clear();
         ConfigureButton.Visibility = Visibility.Collapsed;
         EmptyResultPanel.Visibility = Visibility.Visible;
-        EmptyResultLabel.Text = "正在翻译…";
-        LanguageLabel.Text = settings.TargetLanguage;
+        UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "正在翻译…");
+        UiText.Set(LanguageLabel, System.Windows.Controls.TextBlock.TextProperty, settings.TargetLanguage);
         SetBusy(true);
         _requestSource = Uri.TryCreate(provider.BaseUrl, UriKind.Absolute, out var endpoint)
             ? "请求接口：" + endpoint.Host + endpoint.AbsolutePath + "\n请求模型：" + provider.SelectedModel
@@ -163,7 +164,7 @@ public partial class TranslationWindow : Window
             if (version != _requestVersion) return;
             SetStatus(provider.Name + " · " + provider.SelectedModel, false);
             EmptyResultPanel.Visibility = ResultTextBox.Text.Length > 0 ? Visibility.Collapsed : Visibility.Visible;
-            if (ResultTextBox.Text.Length == 0) EmptyResultLabel.Text = "没有收到译文";
+            if (ResultTextBox.Text.Length == 0) UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "没有收到译文");
         }
         catch (OperationCanceledException)
         {
@@ -178,7 +179,7 @@ public partial class TranslationWindow : Window
             if (ResultTextBox.Text.Length == 0)
             {
                 EmptyResultPanel.Visibility = Visibility.Visible;
-                EmptyResultLabel.Text = "暂时无法翻译";
+                UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "暂时无法翻译");
                 ConfigureButton.Visibility = Visibility.Visible;
             }
         }
@@ -207,7 +208,7 @@ public partial class TranslationWindow : Window
         if (wasBusy)
         {
             SetStatus("已停止", false);
-            if (ResultTextBox.Text.Length == 0) EmptyResultLabel.Text = "翻译已取消";
+            if (ResultTextBox.Text.Length == 0) UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "翻译已取消");
         }
         ResultTextBox.Flush();
     }
@@ -218,7 +219,7 @@ public partial class TranslationWindow : Window
         CopyButton.IsEnabled = false;
         SetStatus(message, true);
         EmptyResultPanel.Visibility = Visibility.Visible;
-        EmptyResultLabel.Text = "配置翻译服务后即可使用";
+        UiText.Set(EmptyResultLabel, System.Windows.Controls.TextBlock.TextProperty, "配置翻译服务后即可使用");
         ConfigureButton.Visibility = Visibility.Visible;
     }
 
@@ -236,10 +237,10 @@ public partial class TranslationWindow : Window
 
     private void SetStatus(string text, bool error)
     {
-        RequestStatusLabel.Text = error ? "翻译未完成" : text;
-        RequestStatusLabel.ToolTip = string.IsNullOrEmpty(_requestSource) ? text : text + "\n" + _requestSource;
+        UiText.Set(RequestStatusLabel, System.Windows.Controls.TextBlock.TextProperty, error ? "翻译未完成" : text);
+        UiText.Set(RequestStatusLabel, FrameworkElement.ToolTipProperty, string.IsNullOrEmpty(_requestSource) ? text : text + "\n" + _requestSource);
         RequestStatusLabel.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, error ? "ErrorBrush" : "MutedBrush");
-        ErrorDetailLabel.Text = error ? text : "";
+        UiText.Set(ErrorDetailLabel, System.Windows.Controls.TextBlock.TextProperty, error ? text : "");
         ErrorDetailLabel.Visibility = error ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -291,8 +292,8 @@ public partial class TranslationWindow : Window
         ResetCopyFeedback();
         CopyIcon.Visibility = Visibility.Collapsed;
         CopySuccessIcon.Visibility = Visibility.Visible;
-        CopyButton.ToolTip = "已复制";
-        AutomationProperties.SetName(CopyButton, "已复制");
+        UiText.Set(CopyButton, FrameworkElement.ToolTipProperty, "已复制");
+        UiText.Set(CopyButton, AutomationProperties.NameProperty, "已复制");
         long version = _copyFeedbackVersion;
         var timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(1500) };
         _copyFeedbackTimer = timer;
@@ -313,8 +314,8 @@ public partial class TranslationWindow : Window
         _copyFeedbackTimer = null;
         CopyIcon.Visibility = Visibility.Visible;
         CopySuccessIcon.Visibility = Visibility.Collapsed;
-        CopyButton.ToolTip = "复制译文";
-        AutomationProperties.SetName(CopyButton, "复制译文");
+        UiText.Set(CopyButton, FrameworkElement.ToolTipProperty, "复制译文");
+        UiText.Set(CopyButton, AutomationProperties.NameProperty, "复制译文");
     }
 
     private void Pinned_Changed(object sender, RoutedEventArgs e)

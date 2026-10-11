@@ -47,10 +47,12 @@ public partial class App : Application
             args.Handled = true;
             _settingsWindow?.SetStatus("操作未完成，请重试。详细信息已写入本地诊断日志。");
         };
+        _store = new SettingsStore();
+        _settings = _store.Load();
+        UiText.Apply(_settings.UiLanguage);
+        UiText.Changed += UpdateTrayLanguage;
         if (e.Args.Contains("--fixture", StringComparer.OrdinalIgnoreCase))
         {
-            _store = new SettingsStore();
-            _settings = _store.Load();
             _theme = new ThemeService(this);
             _theme.Apply(_settings.Theme);
             ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -65,12 +67,10 @@ public partial class App : Application
         {
             DiagnosticLog.Write(background ? "Application duplicate instance exited (background)" : "Application duplicate instance exited (interactive)");
             if (!background)
-                MessageBox.Show("划词翻译已经在运行，请从任务栏托盘打开设置。", "Anywhere Translator");
+                MessageBox.Show(UiText.T("划词翻译已经在运行，请从任务栏托盘打开设置。"), "Anywhere Translator");
             Shutdown(); return;
         }
         StartMenuRegistration.EnsureCurrentExecutable();
-        _store = new SettingsStore();
-        _settings = _store.Load();
         _theme = new ThemeService(this);
         _theme.Apply(_settings.Theme);
         _theme.Changed += UpdateTrayTheme;
@@ -217,6 +217,7 @@ public partial class App : Application
                 _store.SaveConfiguration(settings, pendingApiKeys);
                 _settings = settings;
                 _theme!.Apply(settings.Theme);
+                UiText.Apply(settings.UiLanguage);
                 if (translationChanged) _translation.Cancel();
                 UpdateTray();
                 InvalidateSelection(); HideButton();
@@ -271,8 +272,8 @@ public partial class App : Application
     private void BuildTray()
     {
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("打开设置", null, (_, _) => Dispatcher.BeginInvoke(ShowSettings));
-        _pauseMenu = new Forms.ToolStripMenuItem("暂停划词", null, (_, _) => Dispatcher.BeginInvoke(() =>
+        menu.Items.Add(UiText.T("打开设置"), null, (_, _) => Dispatcher.BeginInvoke(ShowSettings));
+        _pauseMenu = new Forms.ToolStripMenuItem(UiText.T("暂停划词"), null, (_, _) => Dispatcher.BeginInvoke(() =>
         {
             _settings.Enabled = !_settings.Enabled;
             try { _store.Save(_settings); } catch (Exception ex) { DiagnosticLog.Write("Pause preference save failed", ex); }
@@ -280,7 +281,7 @@ public partial class App : Application
             InvalidateSelection(); HideButton(); UpdateTray();
         }));
         menu.Items.Add(_pauseMenu);
-        menu.Items.Add("翻译剪贴板文字", null, (_, _) => Dispatcher.BeginInvoke(() =>
+        menu.Items.Add(UiText.T("翻译剪贴板文字"), null, (_, _) => Dispatcher.BeginInvoke(() =>
         {
             try
             {
@@ -291,7 +292,7 @@ public partial class App : Application
             catch (Exception ex) { DiagnosticLog.Write("Clipboard read failed", ex); }
         }));
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("退出", null, (_, _) => Dispatcher.BeginInvoke(() =>
+        menu.Items.Add(UiText.T("退出"), null, (_, _) => Dispatcher.BeginInvoke(() =>
         {
             if (_settingsWindow?.FlushPendingChanges() == false) { ShowSettings(); return; }
             Shutdown();
@@ -317,10 +318,21 @@ public partial class App : Application
         menu.Invalidate();
     }
 
+    private void UpdateTrayLanguage()
+    {
+        if (_tray?.ContextMenuStrip is { } menu)
+        {
+            menu.Items[0].Text = UiText.T("打开设置");
+            menu.Items[2].Text = UiText.T("翻译剪贴板文字");
+            menu.Items[4].Text = UiText.T("退出");
+        }
+        UpdateTray();
+    }
+
     private void UpdateTray()
     {
-        if (_pauseMenu is not null) _pauseMenu.Text = _settings.Enabled ? "暂停划词" : "恢复划词";
-        if (_tray is not null) _tray.Text = _settings.Enabled ? "Anywhere Translator - 划词已启用" : "Anywhere Translator - 划词已暂停";
+        if (_pauseMenu is not null) _pauseMenu.Text = UiText.T(_settings.Enabled ? "暂停划词" : "恢复划词");
+        if (_tray is not null) _tray.Text = UiText.T(_settings.Enabled ? "Anywhere Translator - 划词已启用" : "Anywhere Translator - 划词已暂停");
     }
 
     private string ReadApiKeySafely(Guid providerId)
@@ -335,6 +347,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        UiText.Changed -= UpdateTrayLanguage;
         _buttonTimer.Stop();
         _theme?.Dispose();
         InvalidateSelection();

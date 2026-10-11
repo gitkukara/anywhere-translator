@@ -30,18 +30,20 @@ internal static partial class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        output = args.Contains("--package") ? Path.Combine(AppContext.BaseDirectory, "checks")
+        output = args.Contains("--package") || args.Contains("--language") ? Path.Combine(AppContext.BaseDirectory, "checks")
             : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v1.1.0"));
         Directory.CreateDirectory(output);
         Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", Path.Combine(output, "test-data"));
         app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        UiText.Apply(InterfaceLanguage.Chinese);
         app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/TranslatorAnywhere;component/Views/Theme.xaml") });
         app.Resources["AppIcon"] = AppIconService.LoadWindowIcon(Path.Combine(output, "test-data"));
         app.Startup += async (_, _) =>
         {
             try
             {
-                if (args.Contains("--package")) await CheckPackageAsync();
+                if (args.Contains("--language")) await CheckLanguageAsync();
+                else if (args.Contains("--package")) await CheckPackageAsync();
                 else if (args.Contains("--recent-icons")) await CheckRecentIconsAsync();
                 else await CheckAsync(args.Contains("--preview"));
                 Console.WriteLine("PASS: " + assertions + " UI assertions (mock provider; no external requests or startup writes).");

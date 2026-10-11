@@ -12,7 +12,7 @@
     <AssemblyTitle>Anywhere Translator</AssemblyTitle>
     <Product>Anywhere Translator</Product>
     <RootNamespace>TranslatorAnywhere</RootNamespace>
-    <Version>1.2.5</Version>
+    <Version>1.3.0</Version>
     <SelfContained>false</SelfContained>
     <!-- WPF owns PerMonitorV2 awareness; WinForms is used only for the tray icon. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
@@ -22,6 +22,7 @@
     <PackageReference Include="SharpVectors.Wpf" Version="1.8.6" />
     <Resource Include="Assets/TranslationRenderer/**/*" />
     <EmbeddedResource Include="Assets/Licenses/**/*" />
+    <EmbeddedResource Include="Localization/en.json" LogicalName="TranslatorAnywhere.Localization.en.json" />
     <Resource Include="Assets/app.ico" />
     <EmbeddedResource Include="../../LICENSE" Link="LICENSE" />
     <EmbeddedResource Include="../../RELEASE_NOTES.md" Link="RELEASE_NOTES.md" />

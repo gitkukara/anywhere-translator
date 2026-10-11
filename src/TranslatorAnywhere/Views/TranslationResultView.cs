@@ -58,6 +58,7 @@ public sealed class TranslationResultView : UserControl, IDisposable
         Content = grid;
         _renderTimer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(120) };
         _renderTimer.Tick += (_, _) => Flush();
+        UiText.Changed += QueueRender;
         Loaded += async (_, _) => await InitializeRendererAsync();
     }
 
@@ -91,6 +92,7 @@ public sealed class TranslationResultView : UserControl, IDisposable
             _browser.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new
             {
                 type = "render", text = Text, revision = _revision,
+                uiLanguage = UiText.IsEnglish ? "en" : "zh-CN",
                 dark = Application.Current?.TryFindResource("IsDarkTheme") is true,
                 palette = new
                 {
@@ -246,7 +248,7 @@ public sealed class TranslationResultView : UserControl, IDisposable
         _browser.Visibility = Visibility.Hidden;
         _fallback.Text = Text;
         _fallback.Visibility = Visibility.Visible;
-        _fallback.ToolTip = "公式排版不可用，已显示源文本。请确认已安装 Microsoft Edge WebView2 Runtime。";
+        UiText.Set(_fallback, ToolTipProperty, "公式排版不可用，已显示源文本。请确认已安装 Microsoft Edge WebView2 Runtime。");
         DiagnosticLog.Write("Translation renderer unavailable; using plain text", error);
     }
 
@@ -254,6 +256,7 @@ public sealed class TranslationResultView : UserControl, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+        UiText.Changed -= QueueRender;
         _renderTimer.Stop();
         _browser.Dispose();
     }

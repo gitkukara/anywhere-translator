@@ -6,6 +6,18 @@ const { createRequire } = require('node:module');
 const tooling = createRequire(path.resolve(__dirname, '../../scripts/renderer/package.json'));
 const { JSDOM } = tooling('jsdom');
 const assets = path.resolve(__dirname, '../../src/TranslatorAnywhere/Assets/TranslationRenderer');
+test('interface language updates accessibility and formula errors without changing text', () => {
+  const f = fixture();
+  const text = String.raw`Paper $\unsupportedcommand{x}$`;
+  f.window.translationRenderer.render({ type: 'render', revision: 1, text, uiLanguage: 'en' });
+  assert.equal(f.window.document.documentElement.lang, 'en');
+  assert.equal(f.article.getAttribute('aria-label'), 'Translation');
+  assert.equal(f.article.querySelector('.math-error').title, 'Cannot render this formula. The original LaTeX is preserved.');
+  const original = f.article.textContent;
+  f.window.translationRenderer.render({ type: 'render', revision: 2, text, uiLanguage: 'zh-CN' });
+  assert.equal(f.article.getAttribute('aria-label'), '译文');
+  assert.equal(f.article.textContent, original);
+});
 function fixture() {
   const dom = new JSDOM('<!doctype html><article id="translation"></article>', { runScripts: 'outside-only' });
   const { window } = dom;

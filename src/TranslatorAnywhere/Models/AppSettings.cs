@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace TranslatorAnywhere.Models;
 
 public enum AppTheme { System, Light, Dark }
+public enum InterfaceLanguage { System, English, Chinese }
 
 public enum ButtonVisualMode { Text, Symbol, Icon }
 public enum ButtonAnchor { SelectionTopRight, SelectionBottomRight, SelectionTopLeft, SelectionBottomLeft, Cursor }
@@ -11,6 +12,7 @@ public enum ButtonAnchor { SelectionTopRight, SelectionBottomRight, SelectionTop
 public sealed class AppSettings
 {
     public AppTheme Theme { get; set; } = AppTheme.System;
+    public InterfaceLanguage UiLanguage { get; set; } = InterfaceLanguage.System;
     public bool Enabled { get; set; } = true;
     public bool LaunchAtStartup { get; set; } = false;
     public ButtonVisualMode ButtonMode { get; set; } = ButtonVisualMode.Text;

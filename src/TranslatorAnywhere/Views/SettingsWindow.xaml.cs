@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -38,6 +38,7 @@ public partial class SettingsWindow : Window
     {
         // Keep incomplete edits separate from the last successfully persisted configuration.
         _draft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings)) ?? new AppSettings();
+        UiText.EnsureInitialized();
         InitializeComponent();
         var assembly = typeof(SettingsWindow).Assembly;
         string version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
@@ -51,9 +52,11 @@ public partial class SettingsWindow : Window
                 Dispatcher.BeginInvoke(new Action(FitAppearanceHeight), DispatcherPriority.Loaded);
         };
         ThemeBox.SelectedIndex = (int)_draft.Theme;
+        UiLanguageBox.SelectedIndex = (int)_draft.UiLanguage;
+        UiText.Changed += RefreshLanguage;
         ModeBox.SelectedIndex = (int)_draft.ButtonMode;
         AnchorBox.SelectedValue = _draft.Anchor.ToString();
-        if (AnchorBox.SelectedIndex < 0) AnchorBox.ToolTip = "保留原来的鼠标附近位置，选择方位后更改。";
+        if (AnchorBox.SelectedIndex < 0) UiText.Set(AnchorBox, FrameworkElement.ToolTipProperty, "保留原来的鼠标附近位置，选择方位后更改。");
         AnchorBox.SelectionChanged += (_, _) => { if (AnchorBox.SelectedIndex >= 0) AnchorBox.ToolTip = null; };
         ButtonTextBox.Text = _draft.ButtonText;
         ColorBox.Text = DisplayColor(_draft.ButtonColor);
@@ -79,6 +82,13 @@ public partial class SettingsWindow : Window
             textBox.TextChanged += (_, _) => QueueSave();
         LanguageBox.SelectionChanged += (_, _) => QueueSave();
         ThemeBox.SelectionChanged += (_, _) => QueueSave();
+        UiLanguageBox.SelectionChanged += (_, _) =>
+        {
+            if (!_ready) return;
+            QueueSave();
+            // Persist first so a failed save cannot silently change the active language.
+            FlushPendingChanges();
+        };
         foreach (var checkBox in new[] { EnabledBox, LaunchAtStartupCheck, HotkeyFallbackBox, AutomaticFallbackBox })
         {
             checkBox.Checked += (_, _) => QueueSave();
@@ -93,7 +103,7 @@ public partial class SettingsWindow : Window
             _invalidControl.BringIntoView();
             _invalidControl.Focus();
         };
-        Closed += (_, _) => { _saveTimer.Stop(); ProviderEditor.Dispose(); };
+        Closed += (_, _) => { UiText.Changed -= RefreshLanguage; _saveTimer.Stop(); ProviderEditor.Dispose(); };
         StatusLabel.MouseLeftButtonUp += (_, _) => FlushPendingChanges();
         LoadIcon(_draft.IconPath);
         RefreshRecentIcons();
@@ -194,6 +204,7 @@ public partial class SettingsWindow : Window
         try
         {
             SettingsSaved.Invoke(settings, pendingKeys);
+            UiText.Apply(settings.UiLanguage);
             // The callback only returns after persistence succeeds; failed credentials remain pending.
             AcceptSaved();
             _draft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings))!;
@@ -219,13 +230,13 @@ public partial class SettingsWindow : Window
     {
         choice.SelectedItem = choice.Items.Cast<ListBoxItem>().FirstOrDefault(item =>
             double.Parse((string)item.Tag, CultureInfo.InvariantCulture) == value);
-        if (choice.SelectedIndex < 0) choice.ToolTip = $"保留原值：{value:0.##}，选择档位后更改。";
+        if (choice.SelectedIndex < 0) UiText.Set(choice, FrameworkElement.ToolTipProperty, $"保留原值：{value:0.##}，选择档位后更改。");
         choice.SelectionChanged += (_, _) => { if (choice.SelectedIndex >= 0) choice.ToolTip = null; };
     }
 
     private string FormSnapshot() => JsonSerializer.Serialize(new
     {
-        Theme = ThemeBox.SelectedIndex, Mode = ModeBox.SelectedIndex, Label = ButtonTextBox.Text, Color = ColorBox.Text,
+        Theme = ThemeBox.SelectedIndex, UiLanguage = UiLanguageBox.SelectedIndex, Mode = ModeBox.SelectedIndex, Label = ButtonTextBox.Text, Color = ColorBox.Text,
         Size = SelectedSize, Transparency = SelectedTransparency,
         Anchor = SelectedAnchor, X = OffsetXBox.Text, Y = OffsetYBox.Text,
         Enabled = EnabledBox.IsChecked, Startup = LaunchAtStartupCheck.IsChecked,
@@ -265,13 +276,13 @@ public partial class SettingsWindow : Window
     {
         if (!_ready || !TryColor(ColorBox.Text, out var color)) return;
         CurrentColorSwatch.Background = new SolidColorBrush(color);
-        CurrentColorSwatch.ToolTip = $"当前颜色：#{color.R:X2}{color.G:X2}{color.B:X2}";
+        UiText.Set(CurrentColorSwatch, FrameworkElement.ToolTipProperty, $"当前颜色：#{color.R:X2}{color.G:X2}{color.B:X2}");
     }
 
     private void LoadIcon(string path)
     {
         _loadedIcon = null;
-        IconNameLabel.Text = string.IsNullOrWhiteSpace(path) ? "尚未导入" : Path.GetFileName(path);
+        UiText.Set(IconNameLabel, System.Windows.Controls.TextBlock.TextProperty, string.IsNullOrWhiteSpace(path) ? "尚未导入" : Path.GetFileName(path));
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return;
         try
         {
@@ -287,8 +298,8 @@ public partial class SettingsWindow : Window
     {
         var dialog = new OpenFileDialog
         {
-            Title = "导入翻译按钮图标",
-            Filter = "图标文件（推荐透明 PNG 或 SVG）|*.png;*.svg;*.jpg;*.jpeg;*.ico;*.bmp;*.gif|PNG 图片|*.png|SVG 矢量图标|*.svg",
+            Title = UiText.T("导入翻译按钮图标"),
+            Filter = UiText.T("图标文件（推荐透明 PNG 或 SVG）|*.png;*.svg;*.jpg;*.jpeg;*.ico;*.bmp;*.gif|PNG 图片|*.png|SVG 矢量图标|*.svg"),
             CheckFileExists = true,
             Multiselect = false
         };
@@ -352,7 +363,7 @@ public partial class SettingsWindow : Window
             {
                 var image = IconImageService.Load(path);
                 choices.Add(new RecentIconChoice(path, image, string.Equals(path, _draft.IconPath, StringComparison.OrdinalIgnoreCase),
-                    "使用最近导入的图标 " + (choices.Count + 1)));
+                    UiText.T("使用最近导入的图标 " + (choices.Count + 1))));
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
         }
@@ -360,7 +371,7 @@ public partial class SettingsWindow : Window
         RecentIcons.ItemsSource = choices;
         RecentIcons.Visibility = choices.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         IconNameLabel.Visibility = choices.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
-        IconNameLabel.Text = "尚未导入";
+        UiText.Set(IconNameLabel, System.Windows.Controls.TextBlock.TextProperty, "尚未导入");
     }
 
     private void TestSelection_Click(object sender, RoutedEventArgs e)
@@ -391,6 +402,7 @@ public partial class SettingsWindow : Window
         if (AutomaticFallbackBox.IsChecked == true && fallbackApps.Count == 0) return Invalid("启用自动复制取词前，请添加至少一个兼容应用。", FallbackAppsBox, 2);
 
         settings.Theme = (AppTheme)Math.Clamp(ThemeBox.SelectedIndex, 0, 2);
+        settings.UiLanguage = (InterfaceLanguage)Math.Clamp(UiLanguageBox.SelectedIndex, 0, 2);
         settings.Enabled = EnabledBox.IsChecked == true;
         settings.LaunchAtStartup = LaunchAtStartupCheck.IsChecked == true;
         settings.ButtonMode = (ButtonVisualMode)Math.Clamp(ModeBox.SelectedIndex, 0, 2);
@@ -413,6 +425,15 @@ public partial class SettingsWindow : Window
 
     private string SelectedLanguage => LanguageBox.SelectedValue as string ?? "简体中文";
 
+    private void RefreshLanguage()
+    {
+        bool ready = _ready;
+        _ready = false;
+        try { RefreshRecentIcons(); }
+        finally { _ready = ready; }
+        Dispatcher.BeginInvoke(new Action(FitAppearanceHeight), DispatcherPriority.Loaded);
+    }
+
     private static AppSettings LegacyDraft(AppSettings settings)
     {
         var copy = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings)) ?? new AppSettings();
@@ -431,8 +452,8 @@ public partial class SettingsWindow : Window
     private void ShowError(string text)
     {
         ++_statusVersion;
-        StatusLabel.Text = text;
-        StatusLabel.ToolTip = text;
+        UiText.Set(StatusLabel, System.Windows.Controls.TextBlock.TextProperty, text);
+        UiText.Set(StatusLabel, FrameworkElement.ToolTipProperty, text);
         StatusLabel.SetResourceReference(TextBlock.ForegroundProperty, "ErrorBrush");
         StatusLabel.Visibility = Visibility.Visible;
     }

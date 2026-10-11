@@ -51,33 +51,44 @@
     <Grid Margin="16,15,16,4">
         <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
         <TabControl x:Name="SettingsTabs" Background="Transparent" BorderThickness="0" Padding="0,14,0,0">
-            <TabItem Header="外观">
+            <TabItem Header="{DynamicResource Ui.86a63f23a076b11e}">
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <ScrollViewer x:Name="AppearanceScrollViewer" Style="{StaticResource SettingsScrollViewer}">
                     <StackPanel>
                         <Border x:Name="AppearanceOptionsCard" Style="{StaticResource Card}" Padding="14" VerticalAlignment="Top">
                             <StackPanel>
+                            <Grid Style="{StaticResource SettingRow}" Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <TextBlock Text="{DynamicResource Ui.9f6fee1aba17a565}" />
+                                    <TextBlock Text="{DynamicResource Ui.cde760e1cfe08e16}" Style="{StaticResource Hint}" FontSize="11" Margin="0,3,0,0" />
+                                </StackPanel>
+                                <ListBox x:Name="UiLanguageBox" Grid.Column="1" Style="{StaticResource SegmentedChoice}" VerticalAlignment="Center" AutomationProperties.Name="{DynamicResource Ui.9f6fee1aba17a565}">
+                                    <ListBoxItem Content="{DynamicResource Ui.217cfe7db1e3d10a}" /><ListBoxItem Content="English" /><ListBoxItem Content="中文" />
+                                </ListBox>
+                            </Grid>
+                            <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,0,0,12" />
                             <Grid Style="{StaticResource SettingRow}" Margin="0">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="界面主题" Style="{StaticResource SettingLabel}" />
-                                <ListBox x:Name="ThemeBox" Grid.Column="1" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="界面主题">
-                                    <ListBoxItem Content="跟随系统" /><ListBoxItem Content="浅色" /><ListBoxItem Content="深色" />
+                                <TextBlock Text="{DynamicResource Ui.8f29293906e72525}" Style="{StaticResource SettingLabel}" />
+                                <ListBox x:Name="ThemeBox" Grid.Column="1" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="{DynamicResource Ui.8f29293906e72525}">
+                                    <ListBoxItem Content="{DynamicResource Ui.217cfe7db1e3d10a}" /><ListBoxItem Content="{DynamicResource Ui.aa0819dfc4d8d782}" /><ListBoxItem Content="{DynamicResource Ui.a6b75d0680322a61}" />
                                 </ListBox>
                             </Grid>
                             <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,12" />
-                                <TextBlock Text="浮动按钮" Style="{StaticResource SectionHeading}" />
+                                <TextBlock Text="{DynamicResource Ui.ebbe86f5f8c01e3c}" Style="{StaticResource SectionHeading}" />
                                 <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="显示方式" Style="{StaticResource SettingLabel}" />
-                                    <ListBox Grid.Column="1" x:Name="ModeBox" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="显示方式" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="文字" /><ListBoxItem Content="符号" /><ListBoxItem Content="自设" /></ListBox>
+                                    <TextBlock Text="{DynamicResource Ui.8d3d73a18affda8e}" Style="{StaticResource SettingLabel}" />
+                                    <ListBox Grid.Column="1" x:Name="ModeBox" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="{DynamicResource Ui.8d3d73a18affda8e}" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="{DynamicResource Ui.14b69bd6eeb0839b}" /><ListBoxItem Content="{DynamicResource Ui.e892654a499d52a7}" /><ListBoxItem Content="{DynamicResource Ui.2f5b1be4353ff3d3}" /></ListBox>
                                 </Grid>
                                 <Grid x:Name="TextModeRow" Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="按钮文字" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="ButtonTextBox" Width="116" HorizontalAlignment="Right" TextAlignment="Center" MaxLength="10" TextChanged="Form_Changed" />
+                                    <TextBlock Text="{DynamicResource Ui.2b79301b1f55ec48}" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="ButtonTextBox" Width="116" HorizontalAlignment="Right" TextAlignment="Center" MaxLength="10" TextChanged="Form_Changed" />
                                 </Grid>
                                 <Grid x:Name="IconModeRow" Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="自定义图标" Style="{StaticResource SettingLabel}" />
+                                    <TextBlock Text="{DynamicResource Ui.70ffa5d85100db0e}" Style="{StaticResource SettingLabel}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <TextBlock x:Name="IconNameLabel" Text="尚未导入" Style="{StaticResource Hint}" VerticalAlignment="Center" TextAlignment="Right" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
+                                        <TextBlock x:Name="IconNameLabel" Text="{DynamicResource Ui.4e625a26557150f5}" Style="{StaticResource Hint}" VerticalAlignment="Center" TextAlignment="Right" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}" />
                                         <ItemsControl x:Name="RecentIcons" Visibility="Collapsed">
                                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate><DataTemplate>
@@ -88,93 +99,93 @@
                                                 </ToggleButton>
                                             </DataTemplate></ItemsControl.ItemTemplate>
                                         </ItemsControl>
-                                        <Button x:Name="ImportIconButton" Content="导入" Click="ImportIcon_Click" Width="50" Padding="8,4" Margin="6,0,0,0" />
+                                        <Button x:Name="ImportIconButton" Content="{DynamicResource Ui.576d81bb0631b165}" Click="ImportIcon_Click" MinWidth="50" Padding="8,4" Margin="6,0,0,0" />
                                     </StackPanel>
                                 </Grid>
                                 <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="按钮大小" Style="{StaticResource SettingLabel}" />
-                                    <ListBox Grid.Column="1" x:Name="SizeChoice" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="按钮大小" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="较小" Tag="24" /><ListBoxItem Content="标准" Tag="32" /><ListBoxItem Content="较大" Tag="40" /><ListBoxItem Content="最大" Tag="48" /></ListBox>
+                                    <TextBlock Text="{DynamicResource Ui.22cd333d1df3a782}" Style="{StaticResource SettingLabel}" />
+                                    <ListBox Grid.Column="1" x:Name="SizeChoice" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="{DynamicResource Ui.22cd333d1df3a782}" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="{DynamicResource Ui.b58fafc108f2ca41}" Tag="24" /><ListBoxItem Content="{DynamicResource Ui.6bea77acefb364ac}" Tag="32" /><ListBoxItem Content="{DynamicResource Ui.ff3e021384504ffd}" Tag="40" /><ListBoxItem Content="{DynamicResource Ui.9730c15f3c1963a1}" Tag="48" /></ListBox>
                                 </Grid>
                                 <Grid x:Name="ColorModeRow" Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="按钮颜色" Style="{StaticResource SettingLabel}" />
+                                    <TextBlock Text="{DynamicResource Ui.13806a9aac2222c0}" Style="{StaticResource SettingLabel}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                        <Button x:Name="BluePreset" Style="{StaticResource ColorPreset}" Background="#3390EC" Tag="#3390EC" ToolTip="#3390EC" AutomationProperties.Name="使用颜色 #3390EC" Click="ColorPreset_Click" />
-                                        <Button x:Name="CyanPreset" Style="{StaticResource ColorPreset}" Background="#63BBD0" Tag="#63BBD0" ToolTip="#63BBD0" AutomationProperties.Name="使用颜色 #63BBD0" Click="ColorPreset_Click" />
-                                        <Button x:Name="PurplePreset" Style="{StaticResource ColorPreset}" Background="#61649F" Tag="#61649F" ToolTip="#61649F" AutomationProperties.Name="使用颜色 #61649F" Click="ColorPreset_Click" />
+                                        <Button x:Name="BluePreset" Style="{StaticResource ColorPreset}" Background="#3390EC" Tag="#3390EC" ToolTip="#3390EC" AutomationProperties.Name="{DynamicResource Ui.c54f5605eb447a87}" Click="ColorPreset_Click" />
+                                        <Button x:Name="CyanPreset" Style="{StaticResource ColorPreset}" Background="#63BBD0" Tag="#63BBD0" ToolTip="#63BBD0" AutomationProperties.Name="{DynamicResource Ui.a53c61acf11fadb9}" Click="ColorPreset_Click" />
+                                        <Button x:Name="PurplePreset" Style="{StaticResource ColorPreset}" Background="#61649F" Tag="#61649F" ToolTip="#61649F" AutomationProperties.Name="{DynamicResource Ui.9fe8228d9bcae89c}" Click="ColorPreset_Click" />
                                         <Border Width="1" Height="16" Background="{DynamicResource DividerBrush}" Margin="6,0,8,0" VerticalAlignment="Center" />
-                                        <Border x:Name="CurrentColorSwatch" Width="18" Height="18" CornerRadius="4" Background="#3390EC" BorderBrush="#18000000" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="当前颜色" AutomationProperties.Name="当前颜色" />
-                                        <TextBox x:Name="ColorBox" Width="84" Padding="6,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="颜色格式：#RRGGBB，例如 #3390EC" />
+                                        <Border x:Name="CurrentColorSwatch" Width="18" Height="18" CornerRadius="4" Background="#3390EC" BorderBrush="#18000000" BorderThickness="1" VerticalAlignment="Center" Margin="0,0,8,0" ToolTip="{DynamicResource Ui.899337a4076deb13}" AutomationProperties.Name="{DynamicResource Ui.899337a4076deb13}" />
+                                        <TextBox x:Name="ColorBox" Width="84" Padding="6,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="{DynamicResource Ui.50a1c4df23d279f8}" />
                                     </StackPanel>
                                 </Grid>
                                 <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="透明度" Style="{StaticResource SettingLabel}" />
-                                    <ListBox Grid.Column="1" x:Name="TransparencyChoice" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="透明度" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="25%" Tag="25" /><ListBoxItem Content="50%" Tag="50" /><ListBoxItem Content="75%" Tag="75" /><ListBoxItem Content="100%" Tag="100" /></ListBox>
+                                    <TextBlock Text="{DynamicResource Ui.05f1293993aea38a}" Style="{StaticResource SettingLabel}" />
+                                    <ListBox Grid.Column="1" x:Name="TransparencyChoice" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="{DynamicResource Ui.05f1293993aea38a}" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="25%" Tag="25" /><ListBoxItem Content="50%" Tag="50" /><ListBoxItem Content="75%" Tag="75" /><ListBoxItem Content="100%" Tag="100" /></ListBox>
                                 </Grid>
                                 <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,5,0,12" />
-                                <TextBlock Text="出现位置" Style="{StaticResource SectionHeading}" />
+                                <TextBlock Text="{DynamicResource Ui.4f61003d991d7bf3}" Style="{StaticResource SectionHeading}" />
                                 <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="相对选区" Style="{StaticResource SettingLabel}" />
-                                    <ListBox Grid.Column="1" x:Name="AnchorBox" Style="{StaticResource SegmentedChoice}" SelectedValuePath="Tag" AutomationProperties.Name="相对选区" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="左上" Tag="SelectionTopLeft" /><ListBoxItem Content="左下" Tag="SelectionBottomLeft" /><ListBoxItem Content="右上" Tag="SelectionTopRight" /><ListBoxItem Content="右下" Tag="SelectionBottomRight" /></ListBox>
+                                    <TextBlock Text="{DynamicResource Ui.c49f958cb27be30d}" Style="{StaticResource SettingLabel}" />
+                                    <ListBox Grid.Column="1" x:Name="AnchorBox" Style="{StaticResource SegmentedChoice}" SelectedValuePath="Tag" AutomationProperties.Name="{DynamicResource Ui.c49f958cb27be30d}" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="{DynamicResource Ui.fef304a69096b2c3}" Tag="SelectionTopLeft" /><ListBoxItem Content="{DynamicResource Ui.8537c17b8e3e8ce3}" Tag="SelectionBottomLeft" /><ListBoxItem Content="{DynamicResource Ui.ddf11974a72b465a}" Tag="SelectionTopRight" /><ListBoxItem Content="{DynamicResource Ui.eae5305a5c764661}" Tag="SelectionBottomRight" /></ListBox>
                                 </Grid>
                                 <Grid Style="{StaticResource SettingRow}" Margin="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Text="横／纵偏移（px）" Style="{StaticResource SettingLabel}" />
+                                    <TextBlock Text="{DynamicResource Ui.3730991a2ec34d5a}" Style="{StaticResource SettingLabel}" />
                                     <Grid Grid.Column="1" Width="96" HorizontalAlignment="Right"><Grid.ColumnDefinitions><ColumnDefinition Width="40" /><ColumnDefinition Width="16" /><ColumnDefinition Width="40" /></Grid.ColumnDefinitions>
-                                        <TextBox x:Name="OffsetXBox" Padding="5,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="横向偏移（px），正数向右。" />
-                                        <TextBlock Grid.Column="1" Text="／" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" /><TextBox Grid.Column="2" x:Name="OffsetYBox" Padding="5,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="纵向偏移（px），正数向下。" />
+                                        <TextBox x:Name="OffsetXBox" Padding="5,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="{DynamicResource Ui.201055811f16c28a}" />
+                                        <TextBlock Grid.Column="1" Text="／" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" /><TextBox Grid.Column="2" x:Name="OffsetYBox" Padding="5,4" TextAlignment="Center" TextChanged="Form_Changed" ToolTip="{DynamicResource Ui.456fe5e6fdc9b389}" />
                                     </Grid>
                                 </Grid>
                             </StackPanel>
                         </Border>
-                    <Button x:Name="TestSelectionButton" Content="点这里预览测试" Style="{StaticResource SubtleButton}" HorizontalAlignment="Right" Margin="0,4,0,0" FontSize="12" Padding="9,0" MinHeight="20" Click="TestSelection_Click" ToolTip="打开测试文本，选择文字查看实际按钮样式和位置" />
+                    <Button x:Name="TestSelectionButton" Content="{DynamicResource Ui.ffb05d3fbe6f64da}" Style="{StaticResource SubtleButton}" HorizontalAlignment="Right" Margin="0,4,0,0" FontSize="12" Padding="9,0" MinHeight="20" Click="TestSelection_Click" ToolTip="{DynamicResource Ui.60335d1712a10280}" />
                     </StackPanel>
                 </ScrollViewer>
 
                 </Grid>
             </TabItem>
-            <TabItem Header="翻译服务">
+            <TabItem Header="{DynamicResource Ui.83095a6428e8d956}">
                 <Grid>
                     <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                     <Border Style="{StaticResource Card}" Padding="14,8" Margin="0,0,0,12">
                         <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                            <TextBlock Text="翻译为" Style="{StaticResource SettingLabel}" />
-                            <views:ContentWidthComboBox Grid.Column="1" x:Name="LanguageBox" Style="{StaticResource CompactChoiceComboBox}" IsEditable="False" SelectedValuePath="Content" ToolTip="点击翻译后，原文会发送至当前服务。"><ComboBoxItem Content="简体中文" /><ComboBoxItem Content="繁体中文" /><ComboBoxItem Content="English" /><ComboBoxItem Content="日本語" /><ComboBoxItem Content="한국어" /></views:ContentWidthComboBox>
+                            <TextBlock Text="{DynamicResource Ui.c59110a32337a979}" Style="{StaticResource SettingLabel}" />
+                            <views:ContentWidthComboBox Grid.Column="1" x:Name="LanguageBox" Style="{StaticResource CompactChoiceComboBox}" IsEditable="False" SelectedValuePath="Tag" ToolTip="{DynamicResource Ui.3025bd118dbe58e2}"><ComboBoxItem Content="{DynamicResource Ui.9937e365aaf3a085}" Tag="简体中文" /><ComboBoxItem Content="{DynamicResource Ui.7bf7a60617de1a5d}" Tag="繁体中文" /><ComboBoxItem Content="English" Tag="English" /><ComboBoxItem Content="日本語" Tag="日本語" /><ComboBoxItem Content="한국어" Tag="한국어" /></views:ContentWidthComboBox>
                         </Grid>
                     </Border>
                     <views:ProviderSettingsControl x:Name="ProviderEditor" Grid.Row="1" />
                 </Grid>
             </TabItem>
-            <TabItem Header="其他设置">
+            <TabItem Header="{DynamicResource Ui.863edfe5ac737a09}">
                 <ScrollViewer x:Name="OtherScrollViewer" Style="{StaticResource SettingsScrollViewer}" Margin="0,0,-12,8">
                     <Border Style="{StaticResource Card}" Padding="14" VerticalAlignment="Top">
                         <StackPanel>
                             <Grid Style="{StaticResource SettingRow}" Margin="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="启用全局划词翻译" VerticalAlignment="Center" />
-                                <CheckBox x:Name="EnabledBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="启用全局划词翻译" />
+                                <TextBlock Text="{DynamicResource Ui.bf5975790ce74b19}" VerticalAlignment="Center" />
+                                <CheckBox x:Name="EnabledBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="{DynamicResource Ui.bf5975790ce74b19}" />
                             </Grid>
                             <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,10,0,10" />
-                            <Grid Style="{StaticResource SettingRow}" Margin="0" ToolTip="登录 Windows 后自动运行，仅显示托盘图标。"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="开机静默启动" VerticalAlignment="Center" />
-                                <CheckBox x:Name="LaunchAtStartupCheck" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="开机静默启动" />
+                            <Grid Style="{StaticResource SettingRow}" Margin="0" ToolTip="{DynamicResource Ui.1debc3bf1ab114f2}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="{DynamicResource Ui.f47b1b4b7274457c}" VerticalAlignment="Center" />
+                                <CheckBox x:Name="LaunchAtStartupCheck" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="{DynamicResource Ui.f47b1b4b7274457c}" />
                             </Grid>
                             <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,12" />
-                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="确认延迟（ms）" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="DelayBox" Width="64" HorizontalAlignment="Right" TextAlignment="Center" ToolTip="选区确认延迟，单位为毫秒" /></Grid>
-                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="自动隐藏（s）" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="AutoHideBox" Width="64" HorizontalAlignment="Right" TextAlignment="Center" ToolTip="按钮自动隐藏时间，单位为秒" /></Grid>
-                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="排除应用" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="ExcludedAppsBox" Width="240" HorizontalAlignment="Right" TextAlignment="Center" AcceptsReturn="True" Height="84" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" ToolTip="填写进程名，用逗号或换行分隔。例如：notepad.exe。" /></Grid>
+                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Ui.d5c83f498b0267b6}" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="DelayBox" Width="64" HorizontalAlignment="Right" TextAlignment="Center" ToolTip="{DynamicResource Ui.dc4a5885185e02ca}" /></Grid>
+                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Ui.d45c2e317382679f}" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="AutoHideBox" Width="64" HorizontalAlignment="Right" TextAlignment="Center" ToolTip="{DynamicResource Ui.6d472730dab4710d}" /></Grid>
+                            <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Ui.81eb7da08176f4f4}" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="ExcludedAppsBox" Width="240" HorizontalAlignment="Right" TextAlignment="Center" AcceptsReturn="True" Height="84" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" ToolTip="{DynamicResource Ui.2059a7faf02ef30b}" /></Grid>
                             <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,12" />
                             <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="快捷键取词失败时，尝试复制取词" VerticalAlignment="Center" />
-                                <CheckBox x:Name="HotkeyFallbackBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="快捷键取词失败时，尝试复制取词" />
+                                <TextBlock Text="{DynamicResource Ui.1969cfd766cd4382}" VerticalAlignment="Center" />
+                                <CheckBox x:Name="HotkeyFallbackBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" AutomationProperties.Name="{DynamicResource Ui.1969cfd766cd4382}" />
                             </Grid>
-                            <Grid Style="{StaticResource SettingRow}" ToolTip="仅在下方兼容名单中的应用启用。"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="兼容应用自动复制取词" VerticalAlignment="Center" />
-                                <CheckBox x:Name="AutomaticFallbackBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" Checked="AutomaticFallback_Changed" Unchecked="AutomaticFallback_Changed" AutomationProperties.Name="兼容应用自动复制取词" />
+                            <Grid Style="{StaticResource SettingRow}" ToolTip="{DynamicResource Ui.6052e3eb2308bfce}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="{DynamicResource Ui.f0534c3bd18f37e9}" VerticalAlignment="Center" />
+                                <CheckBox x:Name="AutomaticFallbackBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" Checked="AutomaticFallback_Changed" Unchecked="AutomaticFallback_Changed" AutomationProperties.Name="{DynamicResource Ui.f0534c3bd18f37e9}" />
                             </Grid>
-                            <Grid Style="{StaticResource SettingRow}" Margin="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="兼容名单" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="FallbackAppsBox" Width="240" HorizontalAlignment="Right" TextAlignment="Center" AcceptsReturn="True" Height="84" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" ToolTip="每行一个进程名。终端程序不会自动复制取词。" /></Grid>
+                            <Grid Style="{StaticResource SettingRow}" Margin="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Ui.acfe6d8ae637c0f3}" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="FallbackAppsBox" Width="240" HorizontalAlignment="Right" TextAlignment="Center" AcceptsReturn="True" Height="84" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" ToolTip="{DynamicResource Ui.88676f8235db5949}" /></Grid>
                             <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,12" />
                             <Grid Style="{StaticResource SettingRow}" Margin="0">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                <TextBlock Text="当前版本" Style="{StaticResource SettingLabel}" />
-                                <TextBlock x:Name="VersionLabel" Grid.Column="1" Style="{StaticResource Hint}" VerticalAlignment="Center" TextAlignment="Right" AutomationProperties.Name="当前版本" />
+                                <TextBlock Text="{DynamicResource Ui.837bc95767211631}" Style="{StaticResource SettingLabel}" />
+                                <TextBlock x:Name="VersionLabel" Grid.Column="1" Style="{StaticResource Hint}" VerticalAlignment="Center" TextAlignment="Right" AutomationProperties.Name="{DynamicResource Ui.837bc95767211631}" />
                             </Grid>
                         </StackPanel>
                     </Border>

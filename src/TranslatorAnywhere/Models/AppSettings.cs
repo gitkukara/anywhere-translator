@@ -16,6 +16,7 @@ public sealed class AppSettings
     public ButtonVisualMode ButtonMode { get; set; } = ButtonVisualMode.Text;
     public string ButtonText { get; set; } = "翻";
     public string IconPath { get; set; } = "";
+    public List<string> RecentIconPaths { get; set; } = new();
     public string ButtonColor { get; set; } = "#3390EC";
     // Percentage: 0 is opaque; 100 is fully transparent.
     public double ButtonTransparency { get; set; } = 0;

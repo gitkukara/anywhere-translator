@@ -57,6 +57,8 @@ public sealed class SettingsStore
             bool migrateColorAlpha = document.RootElement.ValueKind == JsonValueKind.Object
                 && !document.RootElement.TryGetProperty(nameof(AppSettings.ButtonTransparency), out _);
             Normalize(settings, migrateColorAlpha);
+            if (!document.RootElement.TryGetProperty(nameof(AppSettings.RecentIconPaths), out _))
+                settings.RecentIconPaths = RecentIconHistory.Discover(DataDirectory, settings.IconPath);
             if (isLegacy)
             {
                 ProviderRegistry.InitializeLegacy(settings);
@@ -133,6 +135,9 @@ public sealed class SettingsStore
         settings.ButtonText = CleanString(settings.ButtonText, 32);
         if (settings.ButtonText.Length == 0) settings.ButtonText = defaults.ButtonText;
         settings.IconPath = CleanString(settings.IconPath, 32768);
+        settings.RecentIconPaths = RecentIconHistory.Normalize(settings.RecentIconPaths);
+        if (settings.RecentIconPaths.Count == 0 && settings.IconPath.Length > 0)
+            settings.RecentIconPaths.Add(settings.IconPath);
         settings.ButtonColor = CleanString(settings.ButtonColor, 32);
         try
         {

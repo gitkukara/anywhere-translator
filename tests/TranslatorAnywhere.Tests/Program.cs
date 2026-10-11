@@ -27,6 +27,7 @@ internal static class Program
             assertions += ThemePersistenceChecks.Run(directory);
             assertions += ButtonAppearanceChecks.Run(directory);
             assertions += IconImageChecks.Run(directory);
+            assertions += RecentIconChecks.Run(directory);
             CheckPlacement();
             assertions += StartupRegistrationChecks.Run();
             assertions += ProviderPersistenceChecks.Run(directory);

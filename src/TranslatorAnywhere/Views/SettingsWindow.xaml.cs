@@ -91,6 +91,7 @@ public partial class SettingsWindow : Window
         Closed += (_, _) => { _saveTimer.Stop(); ProviderEditor.Dispose(); };
         StatusLabel.MouseLeftButtonUp += (_, _) => FlushPendingChanges();
         LoadIcon(_draft.IconPath);
+        RefreshRecentIcons();
         _ready = true;
         ApplyModeControls();
         ApplyCompatibilityControls();
@@ -225,7 +226,7 @@ public partial class SettingsWindow : Window
         Enabled = EnabledBox.IsChecked, Startup = LaunchAtStartupCheck.IsChecked,
         Delay = DelayBox.Text, Hide = AutoHideBox.Text, Hotkey = HotkeyFallbackBox.IsChecked,
         Automatic = AutomaticFallbackBox.IsChecked, FallbackApps = FallbackAppsBox.Text,
-        ExcludedApps = ExcludedAppsBox.Text, Language = SelectedLanguage, _draft.IconPath,
+        ExcludedApps = ExcludedAppsBox.Text, Language = SelectedLanguage, _draft.IconPath, _draft.RecentIconPaths,
         Providers = ProviderEditor.DraftProviders, ProviderEditor.ActiveProviderId
     });
 
@@ -289,18 +290,72 @@ public partial class SettingsWindow : Window
         if (dialog.ShowDialog(this) != true) return;
         try
         {
-            string path = ImportIcon is null ? dialog.FileName : ImportIcon(dialog.FileName);
-            LoadIcon(path);
-            if (_loadedIcon is null) return;
-            _draft.IconPath = path;
-            ModeBox.SelectedIndex = (int)ButtonVisualMode.Icon;
-            UpdateColorSwatch();
-            QueueSave();
+            ImportIconFile(dialog.FileName);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
             ShowError("图标导入失败：" + ex.Message);
         }
+    }
+
+    private void ImportIconFile(string sourcePath)
+    {
+        string path = ImportIcon is null ? sourcePath : ImportIcon(sourcePath);
+        var image = IconImageService.Load(path);
+        _draft.RecentIconPaths = RecentIconHistory.Add(_draft.RecentIconPaths, path);
+        SelectIcon(path, image);
+    }
+
+    private void RecentIcon_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string path }) return;
+        try { SelectIcon(path, IconImageService.Load(path)); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            _draft.RecentIconPaths.RemoveAll(value => string.Equals(value, path, StringComparison.OrdinalIgnoreCase));
+            if (string.Equals(_draft.IconPath, path, StringComparison.OrdinalIgnoreCase))
+            {
+                _draft.IconPath = "";
+                _loadedIcon = null;
+                ModeBox.SelectedIndex = (int)ButtonVisualMode.Text;
+            }
+            RefreshRecentIcons();
+            QueueSave();
+            ShowError("图标无法读取，请重新导入。");
+        }
+    }
+
+    private void SelectIcon(string path, ImageSource image)
+    {
+        _loadedIcon = image;
+        _draft.IconPath = path;
+        ModeBox.SelectedIndex = (int)ButtonVisualMode.Icon;
+        RefreshRecentIcons();
+        QueueSave();
+    }
+
+    private sealed record RecentIconChoice(string Path, ImageSource Image, bool IsSelected, string Label);
+
+    private void RefreshRecentIcons()
+    {
+        var paths = RecentIconHistory.Normalize(_draft.RecentIconPaths);
+        if (paths.Count == 0 && !string.IsNullOrWhiteSpace(_draft.IconPath)) paths.Add(_draft.IconPath);
+        var choices = new List<RecentIconChoice>();
+        foreach (string path in paths)
+        {
+            try
+            {
+                var image = IconImageService.Load(path);
+                choices.Add(new RecentIconChoice(path, image, string.Equals(path, _draft.IconPath, StringComparison.OrdinalIgnoreCase),
+                    "使用最近导入的图标 " + (choices.Count + 1)));
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
+        }
+        _draft.RecentIconPaths = choices.Select(choice => choice.Path).ToList();
+        RecentIcons.ItemsSource = choices;
+        RecentIcons.Visibility = choices.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        IconNameLabel.Visibility = choices.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+        IconNameLabel.Text = "尚未导入";
     }
 
     private void TestSelection_Click(object sender, RoutedEventArgs e)

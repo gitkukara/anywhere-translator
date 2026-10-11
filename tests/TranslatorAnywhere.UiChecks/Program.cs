@@ -196,6 +196,7 @@ internal static partial class Program
         await CheckThemesAsync(window);
         await CheckFormulaRenderingAsync(window, handler, snapshot);
         await CheckCustomIconsAsync();
+        await CheckRecentIconsAsync();
         if (!preview) { settingsWindow.Close(); window.Hide(); window.DisposeRenderer(); emptyKey.DisposeRenderer(); service.Dispose(); }
         else
         {

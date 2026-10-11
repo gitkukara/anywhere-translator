@@ -1,6 +1,6 @@
 # Anywhere Translator
 
-Windows 桌面划词翻译工具，当前源码和本地构建为 1.2.4，GitHub 下载版仍为 1.1.3。
+Windows 桌面划词翻译工具，当前源码和本地构建为 1.2.5，GitHub 下载版仍为 1.1.3。
 
 鼠标拖选或双击文字后，在选区旁显示按钮。点击按钮打开翻译窗口，并通过用户配置的 AI API 返回译文。程序独立运行，无需浏览器扩展。
 
@@ -12,15 +12,15 @@ Windows 桌面划词翻译工具，当前源码和本地构建为 1.2.4，GitHub
 
 ## 下载与运行
 
-运行环境为 Windows x64。正式发布的完整便携版已内置 .NET 10 Desktop Runtime，解压即可运行，无需另外安装 .NET。
+运行环境为 Windows x64。v1.2.5 起采用单文件 EXE，不内置 .NET；请安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。公式排版还需要 Microsoft Edge WebView2 Runtime。已经安装运行时的电脑无需重复安装。
 
-在 [Releases](https://github.com/gitkukara/anywhere-translator/releases) 下载 `Anywhere-Translator-v1.1.3-win-x64.zip`，完整解压到可写入的目录，然后运行 `Anywhere Translator.exe`。EXE、DLL、JSON 和随附文档应保存在一起。程序使用便携目录保存配置，首次运行需自行配置 API 服务和密钥，并会自动创建当前用户的开始菜单快捷方式。可搜索 `Anywhere Translator`；移动程序目录后，再次运行即可更新快捷方式。删除便携目录后，可在 `Win+R` 输入 `shell:programs`，删除对应快捷方式。
+当前本地构建生成 `Anywhere-Translator-v1.2.5-win-x64.exe`，无需解压或随附 DLL、脚本、字体。放到可写入的固定目录后运行；可改名为 `Anywhere Translator.exe`。程序在旁边的 `data` 文件夹保存配置，首次运行需配置 API 服务和密钥。运行 `Anywhere Translator.exe` 时会自动创建当前用户的开始菜单快捷方式；移动目录后再次运行即可更新入口。删除程序目录后，可在 `Win+R` 输入 `shell:programs`，删除对应快捷方式。[Releases](https://github.com/gitkukara/anywhere-translator/releases) 目前仍为 v1.1.3 旧版 ZIP，旧版需要完整解压并保留随附文件。
 
 GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开发步骤见下方“开发与构建”。
 
 ## 开始使用
 
-1. 运行解压目录中的 `Anywhere Translator.exe`，在设置页配置服务和按钮外观。关闭设置窗口后，程序继续在系统托盘运行；双击托盘图标可重新打开设置。
+1. 运行单文件 EXE，在设置页配置服务和按钮外观。关闭设置窗口后，程序继续在系统托盘运行；双击托盘图标可重新打开设置。
 2. 在“翻译服务”添加供应商，填写 API Key，刷新模型列表或手动填写模型名称，将该供应商设为当前翻译服务。设置自动保存，已有旧版 DeepSeek 配置会自动迁移。
 3. 在其他应用中拖选文字，点击选区旁的按钮。也可双击选词，或选中后按 `Ctrl+Alt+T`。
 4. “外观”右下角的“点这里预览测试”会打开独立文本窗口，验证实际按钮样式、位置和取词交互。
@@ -97,7 +97,7 @@ GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开�
 .\scripts\build.ps1
 ```
 
-也可以直接用自己的多尺寸 ICO 替换 `Assets/app.ico` 后运行构建脚本。构建会保留现有 `dist/win-x64/data/`，生成的版本压缩包不包含配置、API Key、用户图标或日志。更新程序时保留原来的 `data/` 目录；如果目标程序正在运行，应由用户先从托盘退出，再替换发布文件。Windows 可能暂时缓存 EXE 的旧图标，这不影响托盘和窗口读取新的图标。
+也可以直接用自己的多尺寸 ICO 替换 `Assets/app.ico` 后运行构建脚本。构建会保留现有 `dist/win-x64/data/`，生成的单文件 EXE 不包含配置、API Key、用户图标或日志。更新程序时保留原来的 `data/` 目录；如果目标程序正在运行，应由用户先从托盘退出，再替换发布文件。Windows 可能暂时缓存 EXE 的旧图标，这不影响托盘和窗口读取新的图标。
 
 ## 取词与兼容
 
@@ -121,7 +121,7 @@ UIA 失败时，全局快捷键可使用模拟复制降级。在“其他设置�
 
 ## 开发与构建
 
-在 Windows x64 上安装 [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。项目采用 WPF + Win32 + UI Automation，无第三方 NuGet 依赖。SDK 包含运行开发版本所需的 Desktop Runtime。
+在 Windows x64 上安装 [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。项目采用 WPF + Win32 + UI Automation，使用 WebView2 和 SharpVectors。SDK 包含运行开发版本所需的 Desktop Runtime。
 
 获取源码并构建后运行：
 
@@ -141,7 +141,9 @@ dotnet run --project tests/TranslatorAnywhere.UiChecks/TranslatorAnywhere.UiChec
 .\scripts\run.ps1
 ```
 
-默认打包输出为 `dist/win-x64/` 和版本 ZIP，包含 .NET 运行时、WPF 及语言资源。首次构建可能需要联网下载微软运行时组件。`scripts/build.ps1 -FrameworkDependent` 可选生成依赖本机 .NET 的轻量版，其输出目录和 ZIP 名称带 `-framework-dependent`，不会与完整版混用。`-SkipDeploy` 只生成发布包，不覆盖本地运行目录。
+默认打包输出为 `dist/Anywhere-Translator-v版本号-win-x64.exe`，并部署为 `dist/win-x64/Anywhere Translator.exe`。使用本机 .NET 10 Desktop Runtime，不内置运行时；渲染资源、SVG 依赖和许可内嵌在 EXE。首次构建可能需要联网恢复 NuGet 依赖。`-FrameworkDependent` 保留为兼容参数，与默认模式相同；`-SkipDeploy` 只生成 EXE，不覆盖本地运行目录。直接部署前应先退出程序，脚本会备份旧程序文件并保留 data。
+
+仅验证单文件启动可运行 `scripts/check-single-file.ps1 -Executable dist/Anywhere-Translator-v版本号-win-x64.exe`；单文件发布界面检查程序后以 `--package` 运行，可验证内嵌公式、字体与 SVG，无需重复其他功能的回归检查。
 
 ## 已完成的验证
 

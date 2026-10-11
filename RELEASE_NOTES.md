@@ -1,3 +1,14 @@
+# v1.2.5
+
+默认发布改为 Windows x64 单文件 EXE，不再附带 .NET 运行时。
+
+- 运行需要系统安装 .NET 10 Desktop Runtime（x64）和 Microsoft Edge WebView2 Runtime。
+- Markdown、LaTeX 渲染脚本和字体嵌入 EXE，直接从内存提供给浏览器，无需旁边的 Assets 文件夹。
+- SVG 依赖、第三方许可和授权声明一起封装；配置、密钥、导入图标仍保存在原来的 data 目录。
+- 更新时只替换 EXE；构建脚本备份旧程序文件并保留 data。
+
+本次只检查单文件打包、系统运行时加载及内嵌 Markdown / 公式 / 字体 / SVG。本版本提供本地构建，尚未发布 GitHub Release。
+
 # v1.2.4
 
 “其他设置”页底部增加“当前版本”，自动读取程序版本号，便于确认本地运行的版本。

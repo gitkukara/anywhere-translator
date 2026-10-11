@@ -30,7 +30,8 @@ internal static partial class Program
     [STAThread]
     private static int Main(string[] args)
     {
-        output = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v1.1.0"));
+        output = args.Contains("--package") ? Path.Combine(AppContext.BaseDirectory, "checks")
+            : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../artifacts/ui-v1.1.0"));
         Directory.CreateDirectory(output);
         Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", Path.Combine(output, "test-data"));
         app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
@@ -40,7 +41,8 @@ internal static partial class Program
         {
             try
             {
-                if (args.Contains("--recent-icons")) await CheckRecentIconsAsync();
+                if (args.Contains("--package")) await CheckPackageAsync();
+                else if (args.Contains("--recent-icons")) await CheckRecentIconsAsync();
                 else await CheckAsync(args.Contains("--preview"));
                 Console.WriteLine("PASS: " + assertions + " UI assertions (mock provider; no external requests or startup writes).");
                 if (!args.Contains("--preview")) app.Shutdown(0);

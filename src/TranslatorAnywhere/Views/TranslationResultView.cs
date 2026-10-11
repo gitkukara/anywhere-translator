@@ -126,13 +126,10 @@ public sealed class TranslationResultView : UserControl, IDisposable
         _started = true;
         try
         {
-            string assets = Path.Combine(AppContext.BaseDirectory, "Assets", "TranslationRenderer");
-            if (!File.Exists(Path.Combine(assets, "index.html"))) throw new FileNotFoundException("Translation renderer assets are missing.");
             _environment ??= CoreWebView2Environment.CreateAsync(userDataFolder: Path.Combine(SettingsStore.ResolveDataDirectory(), "webview2"));
             await _browser.EnsureCoreWebView2Async(await _environment);
             if (_disposed) return;
             var core = _browser.CoreWebView2;
-            core.SetVirtualHostNameToFolderMapping("translation-renderer.invalid", assets, CoreWebView2HostResourceAccessKind.DenyCors);
             core.Settings.AreDevToolsEnabled = false;
             core.Settings.AreDefaultContextMenusEnabled = false;
             core.Settings.IsStatusBarEnabled = false;
@@ -145,12 +142,7 @@ public sealed class TranslationResultView : UserControl, IDisposable
             core.PermissionRequested += (_, e) => e.State = CoreWebView2PermissionState.Deny;
             core.DownloadStarting += (_, e) => e.Cancel = true;
             core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
-            core.WebResourceRequested += (_, e) =>
-            {
-                if (!Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri)
-                    || uri.Scheme != "https" || uri.Host != "translation-renderer.invalid")
-                    e.Response = core.Environment.CreateWebResourceResponse(null, 403, "Forbidden", "");
-            };
+            core.WebResourceRequested += ServeEmbeddedResource;
             core.WebMessageReceived += OnWebMessage;
             core.NavigationCompleted += (_, e) =>
             {
@@ -162,6 +154,53 @@ public sealed class TranslationResultView : UserControl, IDisposable
             if (!_ready && !_disposed && !_failed) UseFallback(new TimeoutException("Translation renderer startup timed out."));
         }
         catch (Exception ex) { UseFallback(ex); }
+    }
+
+    private void ServeEmbeddedResource(object? sender, CoreWebView2WebResourceRequestedEventArgs e)
+    {
+        var environment = _browser.CoreWebView2.Environment;
+        if (!Uri.TryCreate(e.Request.Uri, UriKind.Absolute, out var uri)
+            || uri.Scheme != "https" || uri.Host != "translation-renderer.invalid" || !uri.IsDefaultPort
+            || e.Request.Method != "GET")
+        {
+            e.Response = environment.CreateWebResourceResponse(null, 403, "Forbidden", "");
+            return;
+        }
+        // Serve only bundled renderer files. No disk paths or network fallback are used.
+        string path = Uri.UnescapeDataString(uri.AbsolutePath).TrimStart('/');
+        foreach (char character in path)
+            if (!(char.IsAsciiLetterOrDigit(character) || character is '/' or '.' or '-' or '_'))
+            {
+                e.Response = environment.CreateWebResourceResponse(null, 404, "Not Found", "");
+                return;
+            }
+        if (path.Contains("..", StringComparison.Ordinal))
+        {
+            e.Response = environment.CreateWebResourceResponse(null, 404, "Not Found", "");
+            return;
+        }
+        try
+        {
+            var resource = Application.GetResourceStream(new Uri(
+                "pack://application:,,,/TranslatorAnywhere;component/Assets/TranslationRenderer/" + path));
+            if (resource is null) throw new IOException("Renderer resource does not exist.");
+            string contentType = Path.GetExtension(path).ToLowerInvariant() switch
+            {
+                ".html" => "text/html; charset=utf-8",
+                ".css" => "text/css; charset=utf-8",
+                ".js" => "text/javascript; charset=utf-8",
+                ".woff2" => "font/woff2",
+                ".woff" => "font/woff",
+                ".ttf" => "font/ttf",
+                _ => "application/octet-stream",
+            };
+            e.Response = environment.CreateWebResourceResponse(resource.Stream, 200, "OK",
+                "Content-Type: " + contentType + "\r\nX-Content-Type-Options: nosniff\r\n");
+        }
+        catch (IOException)
+        {
+            e.Response = environment.CreateWebResourceResponse(null, 404, "Not Found", "");
+        }
     }
 
     private void OnWebMessage(object? sender, CoreWebView2WebMessageReceivedEventArgs e)

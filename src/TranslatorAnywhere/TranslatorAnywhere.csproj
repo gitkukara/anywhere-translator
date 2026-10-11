@@ -12,19 +12,20 @@
     <AssemblyTitle>Anywhere Translator</AssemblyTitle>
     <Product>Anywhere Translator</Product>
     <RootNamespace>TranslatorAnywhere</RootNamespace>
-    <Version>1.2.4</Version>
+    <Version>1.2.5</Version>
+    <SelfContained>false</SelfContained>
     <!-- WPF owns PerMonitorV2 awareness; WinForms is used only for the tray icon. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
     <PackageReference Include="SharpVectors.Wpf" Version="1.8.6" />
-    <Content Include="Assets/TranslationRenderer/**/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <Content Include="Assets/Licenses/**/*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Resource Include="Assets/TranslationRenderer/**/*" />
+    <EmbeddedResource Include="Assets/Licenses/**/*" />
     <Resource Include="Assets/app.ico" />
-    <None Include="../../LICENSE" Link="LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="../../RELEASE_NOTES.md" Link="RELEASE_NOTES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="../../THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <EmbeddedResource Include="../../LICENSE" Link="LICENSE" />
+    <EmbeddedResource Include="../../RELEASE_NOTES.md" Link="RELEASE_NOTES.md" />
+    <EmbeddedResource Include="../../THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" />
   </ItemGroup>
   <!-- Keep the managed assembly identity stable for WPF resource URIs. -->
   <Target Name="RenamePublishedAppHost" AfterTargets="Publish" Condition="'$(UseAppHost)' == 'true'">

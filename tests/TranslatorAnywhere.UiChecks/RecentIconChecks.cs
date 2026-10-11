@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using TranslatorAnywhere.Models;
 using TranslatorAnywhere.Services;
 using TranslatorAnywhere.Views;
@@ -37,9 +39,23 @@ internal static partial class Program
             string[] colors = { "#3390ec", "#a84ac9", "#ff4500", "#22a877" };
             for (int index = 0; index < 4; index++)
             {
-                string source = Path.Combine(directory, "source.svg");
-                string shape = index % 2 == 0 ? "<circle cx=\"16\" cy=\"16\" r=\"12\"" : "<rect x=\"4\" y=\"4\" width=\"24\" height=\"24\" rx=\"4\"";
-                File.WriteAllText(source, "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">" + shape + " fill=\"" + colors[index] + "\"/></svg>");
+                string source = Path.Combine(directory, index == 2 ? "source.png" : "source.svg");
+                int width = new[] { 16, 2048, 128, 1024 }[index];
+                int height = new[] { 16, 128, 2048, 1024 }[index];
+                if (index == 2)
+                {
+                    var visual = new DrawingVisual();
+                    using (var drawing = visual.RenderOpen())
+                        drawing.DrawRectangle(Brushes.OrangeRed, null, new Rect(width * .125, height * .125, width * .75, height * .75));
+                    var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+                    bitmap.Render(visual);
+                    var encoder = new PngBitmapEncoder();
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                    using var file = File.Create(source);
+                    encoder.Save(file);
+                }
+                else
+                    File.WriteAllText(source, $"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {width} {height}\"><rect width=\"{width}\" height=\"{height}\" fill=\"{colors[index]}\"/></svg>");
                 typeof(SettingsWindow).GetMethod("ImportIconFile", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(window, new object[] { source });
                 Check(window.FlushPendingChanges(), "Import persists icon selection and history together");
                 imports.Add(store.Load().IconPath);
@@ -55,6 +71,24 @@ internal static partial class Program
             Check(buttons.Select(button => (string)button.Tag).SequenceEqual(expected), "Thumbnail order follows import time");
             Check(buttons.Count(button => button.IsChecked == true) == 1 && (string)buttons[0].Tag == store.Load().IconPath,
                 "The currently selected icon has one selection marker");
+            var thumbnails = buttons.Select(button => FindVisual<Image>(button)!).ToArray();
+            var viewports = buttons.Select(button => FindVisual<Grid>(button)!).ToArray();
+            Check(thumbnails.Any(image => image.Source is DrawingImage && Near(image.Source.Width, 2048))
+                && thumbnails.Any(image => image.Source is BitmapSource { PixelHeight: 2048 }),
+                "Thumbnail fixtures include wide SVG, tall PNG and large square original images");
+            Check(buttons.All(button => Near(button.ActualWidth, 32) && Near(button.ActualHeight, 32))
+                && viewports.All(viewport => Near(viewport.ActualWidth, 24) && Near(viewport.ActualHeight, 24)),
+                "All thumbnail viewports and click targets stay fixed despite different source sizes");
+            var tallInk = ThumbnailInkSize(viewports[1]);
+            var wideInk = ThumbnailInkSize(viewports[2]);
+            Check(tallInk.Width <= 4 && tallInk.Height >= 15 && wideInk.Height <= 4 && wideInk.Width >= 22,
+                "Thumbnail scaling preserves aspect ratio within the clipped viewport");
+            var sizeChoice = (ListBox)window.FindName("SizeChoice");
+            sizeChoice.SelectedIndex = 3;
+            await LayoutAsync(window);
+            Check(viewports.All(viewport => Near(viewport.ActualWidth, 24) && Near(viewport.ActualHeight, 24)),
+                "Changing the desktop button size does not enlarge recent thumbnails");
+            sizeChoice.SelectedIndex = 1;
             var importButton = (Button)window.FindName("ImportIconButton");
             var stripRight = strip.TranslatePoint(new Point(strip.ActualWidth, 0), window);
             var importLeft = importButton.TranslatePoint(new Point(), window);
@@ -101,5 +135,22 @@ internal static partial class Program
             window?.Close();
             Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", previous);
         }
+    }
+
+    private static Size ThumbnailInkSize(Visual viewport)
+    {
+        var rendered = new RenderTargetBitmap(24, 24, 96, 96, PixelFormats.Pbgra32);
+        rendered.Render(viewport);
+        var pixels = new byte[24 * 24 * 4];
+        rendered.CopyPixels(pixels, 24 * 4, 0);
+        int left = 24, top = 24, right = -1, bottom = -1;
+        for (int y = 0; y < 24; y++)
+            for (int x = 0; x < 24; x++)
+                if (pixels[(y * 24 + x) * 4 + 3] > 16)
+                {
+                    left = Math.Min(left, x); right = Math.Max(right, x);
+                    top = Math.Min(top, y); bottom = Math.Max(bottom, y);
+                }
+        return right >= left ? new Size(right - left + 1, bottom - top + 1) : new Size();
     }
 }

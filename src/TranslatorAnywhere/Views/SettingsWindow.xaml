@@ -17,6 +17,8 @@
             <Style x:Key="SettingLabel" TargetType="TextBlock"><Setter Property="VerticalAlignment" Value="Center" /><Setter Property="TextAlignment" Value="Left" /><Setter Property="Margin" Value="0,0,12,0" /><Setter Property="TextWrapping" Value="NoWrap" /></Style>
             <Style x:Key="RecentIconChoice" TargetType="ToggleButton">
                 <Setter Property="Width" Value="32" /><Setter Property="Height" Value="32" /><Setter Property="Margin" Value="0,0,4,0" />
+                <Setter Property="MinWidth" Value="32" /><Setter Property="MaxWidth" Value="32" /><Setter Property="MinHeight" Value="32" /><Setter Property="MaxHeight" Value="32" />
+                <Setter Property="ClipToBounds" Value="True" />
                 <Setter Property="Padding" Value="3" /><Setter Property="Cursor" Value="Hand" /><Setter Property="FocusVisualStyle" Value="{x:Null}" />
                 <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="Chrome" Background="Transparent" BorderBrush="Transparent" BorderThickness="1" CornerRadius="5" Padding="{TemplateBinding Padding}">
@@ -28,6 +30,19 @@
                         <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource AccentBrush}" /></Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate></Setter.Value></Setter>
+            </Style>
+            <Style x:Key="RecentIconViewport" TargetType="Grid">
+                <Setter Property="Width" Value="24" /><Setter Property="Height" Value="24" />
+                <Setter Property="MinWidth" Value="24" /><Setter Property="MaxWidth" Value="24" /><Setter Property="MinHeight" Value="24" /><Setter Property="MaxHeight" Value="24" />
+                <Setter Property="HorizontalAlignment" Value="Center" /><Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="ClipToBounds" Value="True" />
+            </Style>
+            <Style x:Key="RecentIconThumbnail" TargetType="Image">
+                <Setter Property="Width" Value="24" /><Setter Property="Height" Value="24" />
+                <Setter Property="MaxWidth" Value="24" /><Setter Property="MaxHeight" Value="24" />
+                <Setter Property="HorizontalAlignment" Value="Center" /><Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Stretch" Value="Uniform" />
+                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
             </Style>
             <Style x:Key="SettingRow" TargetType="Grid"><Setter Property="Margin" Value="0,0,0,10" /><Setter Property="MinHeight" Value="28" /></Style>
             <Style x:Key="SectionHeading" TargetType="TextBlock"><Setter Property="FontSize" Value="13" /><Setter Property="FontWeight" Value="SemiBold" /><Setter Property="Margin" Value="0,0,0,10" /></Style>
@@ -67,7 +82,9 @@
                                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate><DataTemplate>
                                                 <ToggleButton Style="{StaticResource RecentIconChoice}" Tag="{Binding Path}" IsChecked="{Binding IsSelected, Mode=OneWay}" ToolTip="{Binding Label}" AutomationProperties.Name="{Binding Label}" Click="RecentIcon_Click">
-                                                    <Image Source="{Binding Image}" Width="24" Height="24" Stretch="Uniform" />
+                                                    <Grid Style="{StaticResource RecentIconViewport}">
+                                                        <Image Source="{Binding Image}" Style="{StaticResource RecentIconThumbnail}" />
+                                                    </Grid>
                                                 </ToggleButton>
                                             </DataTemplate></ItemsControl.ItemTemplate>
                                         </ItemsControl>

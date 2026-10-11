@@ -40,7 +40,8 @@ internal static partial class Program
         {
             try
             {
-                await CheckAsync(args.Contains("--preview"));
+                if (args.Contains("--recent-icons")) await CheckRecentIconsAsync();
+                else await CheckAsync(args.Contains("--preview"));
                 Console.WriteLine("PASS: " + assertions + " UI assertions (mock provider; no external requests or startup writes).");
                 if (!args.Contains("--preview")) app.Shutdown(0);
             }

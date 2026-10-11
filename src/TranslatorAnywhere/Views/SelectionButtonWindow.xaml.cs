@@ -1,9 +1,7 @@
 using System;
-using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TranslatorAnywhere.Models;
 using TranslatorAnywhere.Native;
 using TranslatorAnywhere.Services;
@@ -15,10 +13,12 @@ public partial class SelectionButtonWindow : Window
     public event Action? TranslationRequested;
     public SelectionSnapshot? Selection { get; private set; }
     private double _baseOpacity = 1;
+    private readonly System.Windows.Media.Effects.Effect _tileShadow;
 
     public SelectionButtonWindow()
     {
         InitializeComponent();
+        _tileShadow = Tile.Effect;
         SourceInitialized += (_, _) => DesktopInterop.MakeNonActivating(this);
         Tile.MouseEnter += (_, _) => Tile.Opacity = _baseOpacity * .9;
         Tile.MouseLeave += (_, _) => Tile.Opacity = _baseOpacity;
@@ -33,6 +33,8 @@ public partial class SelectionButtonWindow : Window
         Tile.Width = Tile.Height = Math.Clamp(settings.ButtonSize, 24, 72);
         Symbol.Width = Symbol.Height = Tile.Width - 10;
         Tile.CornerRadius = new CornerRadius(Math.Min(10, settings.ButtonSize * .22));
+        Tile.BorderThickness = new Thickness(1);
+        Tile.Effect = _tileShadow;
         Glyph.Text = string.IsNullOrWhiteSpace(settings.ButtonText) ? "翻" : settings.ButtonText;
         Glyph.FontSize = Math.Clamp(settings.ButtonSize * (Glyph.Text.Length > 2 ? .26 : .54), 10, 32);
         Glyph.MaxWidth = settings.ButtonSize - 6;
@@ -50,15 +52,13 @@ public partial class SelectionButtonWindow : Window
         {
             try
             {
-                using var stream = File.OpenRead(settings.IconPath);
-                var bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                bitmap.StreamSource = stream;
-                bitmap.EndInit();
-                bitmap.Freeze();
-                CustomIcon.Source = bitmap;
+                CustomIcon.Source = IconImageService.Load(settings.IconPath);
                 CustomIcon.Visibility = Visibility.Visible;
+                // A transparent hit surface keeps the whole icon clickable without adding visible chrome.
+                Tile.Background = Brushes.Transparent;
+                Tile.BorderThickness = new Thickness(0);
+                Tile.CornerRadius = new CornerRadius(0);
+                Tile.Effect = null;
             }
             catch { Glyph.Text = "翻"; Glyph.Visibility = Visibility.Visible; }
         }

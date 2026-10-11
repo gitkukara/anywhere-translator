@@ -9,7 +9,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using TranslatorAnywhere.Models;
 
 namespace TranslatorAnywhere.Services;
@@ -17,7 +16,6 @@ namespace TranslatorAnywhere.Services;
 public sealed class SettingsStore
 {
     private const int MaximumKeyBytes = 16 * 1024;
-    private const int MaximumIconBytes = 5 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -333,39 +331,8 @@ public sealed class SettingsStore
     public string ImportIcon(string sourcePath)
     {
         string extension = Path.GetExtension(sourcePath).ToLowerInvariant();
-        if (extension is not (".png" or ".jpg" or ".jpeg" or ".ico" or ".bmp" or ".gif"))
-            throw new ArgumentException("图标支持 PNG、JPG、ICO、BMP 和 GIF 格式。");
-        byte[] bytes;
-        using (var stream = File.OpenRead(sourcePath))
-        {
-            if (stream.Length == 0 || stream.Length > MaximumIconBytes)
-                throw new ArgumentException("图标文件必须大于 0 字节且不超过 5 MB。");
-            bytes = new byte[checked((int)stream.Length)];
-            stream.ReadExactly(bytes);
-        }
-        try
-        {
-            using var imageStream = new MemoryStream(bytes, writable: false);
-            // Inspect dimensions before decoding pixels, so a tiny compressed image cannot allocate an oversized bitmap.
-            var decoder = BitmapDecoder.Create(imageStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnDemand);
-            if (decoder.Frames.Count == 0 || decoder.Frames.Count > 64)
-                throw new InvalidDataException("Unsupported frame count.");
-            long totalPixels = 0;
-            foreach (var frame in decoder.Frames)
-            {
-                totalPixels += (long)frame.PixelWidth * frame.PixelHeight;
-                if (frame.PixelWidth <= 0 || frame.PixelHeight <= 0 || frame.PixelWidth > 2048 || frame.PixelHeight > 2048
-                    || totalPixels > 16 * 1024 * 1024)
-                    throw new InvalidDataException("Icon dimensions exceed the limit.");
-                int stride = checked((frame.PixelWidth * frame.Format.BitsPerPixel + 7) / 8);
-                frame.CopyPixels(new byte[checked(stride * frame.PixelHeight)], stride, 0);
-            }
-        }
-        catch (Exception ex) when (ex is NotSupportedException or InvalidDataException or ArgumentException or FormatException
-            or IOException or OverflowException or System.Runtime.InteropServices.COMException)
-        {
-            throw new ArgumentException("无法读取图标。请使用有效图片，尺寸不超过 2048 × 2048，帧数不超过 64。", ex);
-        }
+        byte[] bytes = IconImageService.ReadFile(sourcePath);
+        IconImageService.Decode(bytes, extension);
         string iconsDirectory = Path.Combine(DataDirectory, "icons");
         Directory.CreateDirectory(iconsDirectory);
         string destination = Path.Combine(iconsDirectory, Guid.NewGuid().ToString("N") + extension);

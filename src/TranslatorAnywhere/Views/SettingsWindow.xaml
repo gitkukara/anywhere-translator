@@ -56,7 +56,7 @@
                                     <TextBlock Text="按钮大小" Style="{StaticResource SettingLabel}" />
                                     <ListBox Grid.Column="1" x:Name="SizeChoice" Style="{StaticResource SegmentedChoice}" AutomationProperties.Name="按钮大小" SelectionChanged="Form_SelectionChanged"><ListBoxItem Content="较小" Tag="24" /><ListBoxItem Content="标准" Tag="32" /><ListBoxItem Content="较大" Tag="40" /><ListBoxItem Content="最大" Tag="48" /></ListBox>
                                 </Grid>
-                                <Grid Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <Grid x:Name="ColorModeRow" Style="{StaticResource SettingRow}"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <TextBlock Text="按钮颜色" Style="{StaticResource SettingLabel}" />
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <Button x:Name="BluePreset" Style="{StaticResource ColorPreset}" Background="#3390EC" Tag="#3390EC" ToolTip="#3390EC" AutomationProperties.Name="使用颜色 #3390EC" Click="ColorPreset_Click" />

@@ -26,6 +26,7 @@ internal static class Program
             CheckSettingsAndIcons(directory);
             assertions += ThemePersistenceChecks.Run(directory);
             assertions += ButtonAppearanceChecks.Run(directory);
+            assertions += IconImageChecks.Run(directory);
             CheckPlacement();
             assertions += StartupRegistrationChecks.Run();
             assertions += ProviderPersistenceChecks.Run(directory);
@@ -95,7 +96,7 @@ internal static class Program
         Check(File.Exists(importedPath) && importedPath.StartsWith(Path.Combine(directory, "icons"), StringComparison.Ordinal), "Icon imported into portable data");
         File.WriteAllText(imagePath, "invalid fixture bitmap");
         Throws<ArgumentException>(() => store.ImportIcon(imagePath), "Invalid icon rejected");
-        Throws<ArgumentException>(() => store.ImportIcon("fixture.svg"), "Unsupported icon extension rejected");
+        Throws<ArgumentException>(() => store.ImportIcon("fixture.txt"), "Unsupported icon extension rejected");
         var oversizedBitmap = BitmapSource.Create(2049, 1, 96, 96, PixelFormats.Bgra32, null, new byte[2049 * 4], 2049 * 4);
         var oversizedEncoder = new PngBitmapEncoder();
         oversizedEncoder.Frames.Add(BitmapFrame.Create(oversizedBitmap));

@@ -2,7 +2,7 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-当前源码和本地构建为 v1.2.0，新增 Markdown / LaTeX 公式排版；下方下载链接仍指向已发布的 v1.1.3。
+当前源码和本地构建为 v1.2.1，支持 Markdown / LaTeX 公式排版，以及无底框的透明 PNG / SVG 浮动图标；下方下载链接仍指向已发布的 v1.1.3。
 
 [下载 v1.1.3](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.3) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
@@ -26,6 +26,8 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。
 
 在“外观”中切换界面主题、调整按钮样式和位置；右下角“点这里预览测试”可打开测试文字窗口。
+
+浮动按钮选择“自设”后可导入透明 PNG 或静态 SVG，只显示图片本身，不附加底色、边框或阴影。图片按原比例缩放，大小和透明度仍可调整；JPG 等图片自带的背景会保留。
 
 **Zotero 取词**：在“其他设置”开启“兼容应用自动复制取词”，并在“兼容名单”填写 `zotero`。该方式会模拟复制来读取选中文字。
 

@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using TranslatorAnywhere.Models;
@@ -26,7 +25,7 @@ public partial class SettingsWindow : Window
     private int _statusVersion;
     private Control? _invalidControl;
     private int _invalidTab;
-    private BitmapSource? _loadedIcon;
+    private ImageSource? _loadedIcon;
 
     public event Action<AppSettings, IReadOnlyDictionary<Guid, string>>? SettingsSaved;
     public event Action? TestSelectionRequested;
@@ -235,6 +234,7 @@ public partial class SettingsWindow : Window
         ButtonTextBox.IsEnabled = ModeBox.SelectedIndex == 0;
         TextModeRow.Visibility = ModeBox.SelectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
         IconModeRow.Visibility = ModeBox.SelectedIndex == 2 ? Visibility.Visible : Visibility.Collapsed;
+        ColorModeRow.Visibility = ModeBox.SelectedIndex == 2 ? Visibility.Collapsed : Visibility.Visible;
         if (IsLoaded) Dispatcher.BeginInvoke(new Action(FitAppearanceHeight), DispatcherPriority.Loaded);
     }
 
@@ -269,15 +269,11 @@ public partial class SettingsWindow : Window
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return;
         try
         {
-            using var stream = File.OpenRead(path);
-            var decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.IgnoreImageCache, BitmapCacheOption.OnLoad);
-            var frame = decoder.Frames[0];
-            frame.Freeze();
-            _loadedIcon = frame;
+            _loadedIcon = IconImageService.Load(path);
         }
         catch (Exception ex) when (ex is IOException or NotSupportedException or ArgumentException or FormatException or UnauthorizedAccessException or System.Runtime.InteropServices.COMException)
         {
-            SetStatus("图标无法读取，请重新导入 PNG、JPG、ICO、BMP 或 GIF 图片。");
+            SetStatus("图标无法读取，请重新导入透明 PNG 或静态 SVG，也支持 JPG、ICO、BMP 和 GIF。");
         }
     }
 
@@ -286,7 +282,7 @@ public partial class SettingsWindow : Window
         var dialog = new OpenFileDialog
         {
             Title = "导入翻译按钮图标",
-            Filter = "图片文件|*.png;*.jpg;*.jpeg;*.ico;*.bmp;*.gif",
+            Filter = "图标文件（推荐透明 PNG 或 SVG）|*.png;*.svg;*.jpg;*.jpeg;*.ico;*.bmp;*.gif|PNG 图片|*.png|SVG 矢量图标|*.svg",
             CheckFileExists = true,
             Multiselect = false
         };
@@ -317,7 +313,12 @@ public partial class SettingsWindow : Window
         settings = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(_draft)) ?? new AppSettings();
         string label = ButtonTextBox.Text.Trim();
         if (ModeBox.SelectedIndex == 0 && string.IsNullOrWhiteSpace(label)) return Invalid("请输入按钮文字。", ButtonTextBox, 0);
-        if (!TryColor(ColorBox.Text, out Color color)) return Invalid("颜色格式应为 #RRGGBB，例如 #3390EC。", ColorBox, 0);
+        if (!TryColor(ColorBox.Text, out Color color))
+        {
+            if (ModeBox.SelectedIndex != (int)ButtonVisualMode.Icon)
+                return Invalid("颜色格式应为 #RRGGBB，例如 #3390EC。", ColorBox, 0);
+            if (!TryColor(_draft.ButtonColor, out color)) color = Color.FromRgb(51, 144, 236);
+        }
         if (!TryOffset(OffsetXBox.Text, out double offsetX)) return Invalid("横向偏移应为 -500 到 500 之间的数字。", OffsetXBox, 0);
         if (!TryOffset(OffsetYBox.Text, out double offsetY)) return Invalid("纵向偏移应为 -500 到 500 之间的数字。", OffsetYBox, 0);
         if (ModeBox.SelectedIndex == 2 && (_loadedIcon is null || string.IsNullOrWhiteSpace(settings.IconPath) || !File.Exists(settings.IconPath))) return Invalid("请先导入有效的按钮图标。", ModeBox, 0);

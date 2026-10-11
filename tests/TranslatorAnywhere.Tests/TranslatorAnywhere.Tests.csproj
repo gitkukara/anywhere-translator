@@ -7,6 +7,8 @@
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.6" />
+    <Compile Include="../../src/TranslatorAnywhere/Services/IconImageService.cs" Link="Services/IconImageService.cs" />
     <Compile Include="../../src/TranslatorAnywhere/Models/AppSettings.cs" Link="Models/AppSettings.cs" />
     <Compile Include="../../src/TranslatorAnywhere/Models/ProviderConfiguration.cs" Link="Models/ProviderConfiguration.cs" />
     <Compile Include="../../src/TranslatorAnywhere/Models/ProviderPreset.cs" Link="Models/ProviderPreset.cs" />

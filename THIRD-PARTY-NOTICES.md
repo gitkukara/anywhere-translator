@@ -1,3 +1,5 @@
+SVG icon rendering: SharpVectors.Wpf 1.8.6 (https://github.com/ElinamLLC/SharpVectors), BSD-3-Clause. Copyright (c) 2010 - 2026 Elinam LLC. Full license and component notices: Assets/Licenses/SharpVectors-LICENSE.txt.
+
 Translation rendering libraries (bundled locally under Assets/TranslationRenderer/vendor):
 
 - Marked 18.1.0 (https://marked.js.org/), MIT. Full license: Assets/TranslationRenderer/vendor/marked-LICENSE.

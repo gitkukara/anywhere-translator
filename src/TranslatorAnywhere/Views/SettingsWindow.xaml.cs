@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,6 +39,10 @@ public partial class SettingsWindow : Window
         // Keep incomplete edits separate from the last successfully persisted configuration.
         _draft = JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(settings)) ?? new AppSettings();
         InitializeComponent();
+        var assembly = typeof(SettingsWindow).Assembly;
+        string version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0]
+            ?? assembly.GetName().Version?.ToString(3) ?? "未知";
+        VersionLabel.Text = "v" + version;
         ThemeService.TrackWindow(this);
         Loaded += (_, _) => FitAppearanceHeight();
         SettingsTabs.SelectionChanged += (_, e) =>

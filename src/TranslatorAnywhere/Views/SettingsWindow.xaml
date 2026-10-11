@@ -170,6 +170,12 @@
                                 <CheckBox x:Name="AutomaticFallbackBox" Grid.Column="1" Content="" Style="{StaticResource SwitchBar}" Checked="AutomaticFallback_Changed" Unchecked="AutomaticFallback_Changed" AutomationProperties.Name="兼容应用自动复制取词" />
                             </Grid>
                             <Grid Style="{StaticResource SettingRow}" Margin="0"><Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions><TextBlock Text="兼容名单" Style="{StaticResource SettingLabel}" /><TextBox Grid.Column="1" x:Name="FallbackAppsBox" Width="240" HorizontalAlignment="Right" TextAlignment="Center" AcceptsReturn="True" Height="84" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" ToolTip="每行一个进程名。终端程序不会自动复制取词。" /></Grid>
+                            <Border Height="1" Background="{DynamicResource DividerBrush}" Margin="0,12,0,12" />
+                            <Grid Style="{StaticResource SettingRow}" Margin="0">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                <TextBlock Text="当前版本" Style="{StaticResource SettingLabel}" />
+                                <TextBlock x:Name="VersionLabel" Grid.Column="1" Style="{StaticResource Hint}" VerticalAlignment="Center" TextAlignment="Right" AutomationProperties.Name="当前版本" />
+                            </Grid>
                         </StackPanel>
                     </Border>
                 </ScrollViewer>

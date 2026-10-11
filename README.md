@@ -2,7 +2,7 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
-当前源码和本地构建为 v1.2.3，支持 Markdown / LaTeX 公式排版、透明 PNG / SVG 浮动图标和最近三个导入图标的快速切换；下方下载链接仍指向已发布的 v1.1.3。
+当前源码和本地构建为 v1.2.4，支持 Markdown / LaTeX 公式排版、透明 PNG / SVG 浮动图标和最近三个导入图标的快速切换；下方下载链接仍指向已发布的 v1.1.3。
 
 [下载 v1.1.3](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.3) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
@@ -26,6 +26,8 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 4. 点击翻译浮窗外部即可收起，钉住后保持显示。
 
 在“外观”中切换界面主题、调整按钮样式和位置；右下角“点这里预览测试”可打开测试文字窗口。
+
+“其他设置”页底部可查看当前程序版本号。
 
 浮动按钮选择“自设”后可导入透明 PNG 或静态 SVG，只显示图片本身，不附加底色、边框或阴影。图片按原比例缩放，大小和透明度仍可调整；JPG 等图片自带的背景会保留。
 

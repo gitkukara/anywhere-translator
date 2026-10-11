@@ -2,6 +2,8 @@
 
 Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。不局限于浏览器。
 
+当前源码和本地构建为 v1.2.0，新增 Markdown / LaTeX 公式排版；下方下载链接仍指向已发布的 v1.1.3。
+
 [下载 v1.1.3](https://github.com/gitkukara/anywhere-translator/releases/tag/v1.1.3) · [更新说明](RELEASE_NOTES.md) · [使用说明](https://github.com/gitkukara/anywhere-translator/blob/main/docs/USAGE.md)
 
 <img src="docs/screenshots/appearance.png" alt="浅色外观设置" width="360" />
@@ -10,6 +12,7 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 
 - 支持多种 API 接入： DeepSeek、智谱 GLM、小米 MiMo、千问 Qwen、OpenAI、Gemini ，还可自定义接口，API Key 在本机加密保存；
 - 支持界面浅色、深色及跟随系统；
+- 译文支持 Markdown 与 LaTeX 数学公式排版，适合论文阅读；
 - 支持自定义翻译按钮的样式与出现位置；
 - 支持开机自启动；
 - 解压即用，已内置 .NET 运行时，无需另外安装。
@@ -48,6 +51,8 @@ Windows 全局划词翻译：选中文字 → 点击按钮 → 查看译文。�
 **图标说明**：如果 `data` 中有自定义的 `app.ico`，升级后仍优先使用它。想换回新版内置图标，可以退出程序后将它改名为 `app.ico.bak`，再启动程序。
 
 **使用限制**：图片、扫描 PDF 暂不支持 OCR；部分应用可能需要兼容取词设置。Zotero 已在本机验证可用，福昕 PDF 编辑器兼容问题仍待完善。
+
+**论文与公式**：译文支持标题、列表、表格、代码和常见数学公式，包括行内公式、独立公式及多行对齐。长公式和宽表格可横向滚动，复制按钮保留 Markdown / LaTeX 源文本。渲染库及字体随程序打包，排版无需联网；需要 Microsoft Edge WebView2 Runtime，缺失或加载失败时自动显示源文本。若 PDF 复制时已经丢失上下标、分数结构或符号，程序无法保证恢复原公式；不支持的 LaTeX 命令会保留为文本。
 
 ## 开发
 

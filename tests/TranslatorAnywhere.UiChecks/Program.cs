@@ -84,7 +84,7 @@ internal static partial class Program
         Check(window.FindName("SourceTextBox") is null, "Original text control is absent");
         Check(!VisibleText(window).Contains(snapshot.Text, StringComparison.Ordinal), "Original text is not rendered");
         Check(((Button)window.FindName("CancelButton")).Visibility == Visibility.Collapsed, "Stop is hidden after completion");
-        Check(((TextBox)window.FindName("ResultTextBox")).Text == handler.Translation, "Translation is shown");
+        Check(((TranslationResultView)window.FindName("ResultTextBox")).Text == handler.Translation, "Translation is shown");
         Check(handler.LastKey == "test-fixture-key" && handler.LastModel == firstProvider.SelectedModel && handler.LastHost == "api.deepseek.com", "Active provider owns its endpoint, model and key");
         CheckPopupIcons(window);
         Save(window, "translation-short.png");
@@ -194,7 +194,8 @@ internal static partial class Program
         await CheckAutomaticSavingAsync();
         await CheckRestoredDamagedConfigurationAsync();
         await CheckThemesAsync(window);
-        if (!preview) { settingsWindow.Close(); window.Hide(); service.Dispose(); }
+        await CheckFormulaRenderingAsync(window, handler, snapshot);
+        if (!preview) { settingsWindow.Close(); window.Hide(); window.DisposeRenderer(); emptyKey.DisposeRenderer(); service.Dispose(); }
         else
         {
             // Interactive inspection also stays on fixtures; no button can send a real API request.
@@ -728,6 +729,13 @@ internal static partial class Program
     private static async Task LayoutAsync(Window window)
     {
         await window.Dispatcher.InvokeAsync(() => window.UpdateLayout(), DispatcherPriority.ApplicationIdle);
+        if (window.FindName("ResultTextBox") is TranslationResultView result)
+        {
+            var deadline = DateTime.UtcNow.AddSeconds(15);
+            while ((!result.IsRendererReady || result.RenderedRevision != result.Revision) && DateTime.UtcNow < deadline)
+                await Task.Delay(40);
+            window.UpdateLayout();
+        }
         await Task.Delay(80);
     }
 

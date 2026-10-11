@@ -1,3 +1,10 @@
+Translation rendering libraries (bundled locally under Assets/TranslationRenderer/vendor):
+
+- Marked 18.1.0 (https://marked.js.org/), MIT. Full license: Assets/TranslationRenderer/vendor/marked-LICENSE.
+- KaTeX 0.19.0, including its fonts (https://katex.org/), MIT. Copyright (c) 2013-2020 Khan Academy and other contributors. Full license: Assets/TranslationRenderer/vendor/katex-LICENSE.
+- DOMPurify 3.4.16 (https://github.com/cure53/DOMPurify), used under Apache-2.0. Full license: Assets/TranslationRenderer/vendor/dompurify-LICENSE.
+- Microsoft.Web.WebView2 SDK 1.0.4258.31 (https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.4258.31), Microsoft redistribution license. Full license: Assets/TranslationRenderer/vendor/WebView2-LICENSE.txt. The SDK/loader is bundled; Microsoft Edge WebView2 Runtime is installed separately.
+
 Provider logo artwork: LobeHub Icons (https://github.com/lobehub/lobe-icons), obtained from magpie (https://github.com/yetone/magpie), commit 7547dfb. Converted from SVG to WPF DrawingImage resources. Logos identify the respective providers; no affiliation is implied.
 
 MIT License

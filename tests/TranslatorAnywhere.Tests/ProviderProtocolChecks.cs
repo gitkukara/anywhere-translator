@@ -23,9 +23,37 @@ internal static class ProviderProtocolChecks
         CheckEndpoints();
         await CheckOpenAiAsync();
         await CheckAnthropicAsync();
+        await CheckPaperTranslationAsync();
         await CheckModelsAsync();
         await CheckConnectionTestsAsync();
         return assertions;
+    }
+
+    private static async Task CheckPaperTranslationAsync()
+    {
+        const string paper = "## Loss function\n\nFor \\(x_i\\), see [12].\n\\[\\mathcal{L}=\\sum_i \\frac{x_i^2}{n}\\tag{3}\\]";
+        foreach (var protocol in new[] { ProviderProtocol.OpenAICompatible, ProviderProtocol.AnthropicMessages })
+        {
+            var provider = Profile(protocol: protocol);
+            using var service = new TranslationService(new FakeHandler(async (request, token) =>
+            {
+                using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(token));
+                var root = body.RootElement;
+                var messages = root.GetProperty("messages");
+                Equal(paper, messages[protocol == ProviderProtocol.AnthropicMessages ? 0 : 1].GetProperty("content").GetString(),
+                    "Paper source, citations and TeX reach the provider without escaping damage: " + protocol);
+                string prompt = protocol == ProviderProtocol.AnthropicMessages ? root.GetProperty("system").GetString()!
+                    : messages[0].GetProperty("content").GetString()!;
+                Check(prompt.Contains("LaTeX") && prompt.Contains("do not invent missing formulas") && prompt.Contains("\\( ... \\)"),
+                    "Paper translation instructions preserve formulas and delimiters: " + protocol);
+                return JsonResponse(protocol == ProviderProtocol.AnthropicMessages
+                    ? "{\"content\":[{\"type\":\"text\",\"text\":\"译文 \\\\(x_i\\\\)\"}],\"stop_reason\":\"end_turn\"}"
+                    : "{\"choices\":[{\"message\":{\"content\":\"译文 \\\\(x_i\\\\)\"},\"finish_reason\":\"stop\"}]}" );
+            }));
+            var text = new StringBuilder();
+            await service.TranslateAsync(provider, Key, paper, "简体中文", delta => text.Append(delta), CancellationToken.None);
+            Equal("译文 \\(x_i\\)", text.ToString(), "Provider response retains formula source: " + protocol);
+        }
     }
 
     private static ProviderConfiguration Profile(string baseUrl = "https://example.test/v1", ProviderProtocol protocol = ProviderProtocol.OpenAICompatible) => new()

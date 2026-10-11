@@ -342,6 +342,7 @@ public partial class App : Application
         _shortcut?.Dispose();
         _capture?.Dispose();
         _translation?.Cancel();
+        _translation?.DisposeRenderer();
         _translationService?.Dispose();
         if (_tray is not null) { _tray.Visible = false; _tray.Icon?.Dispose(); _tray.ContextMenuStrip?.Dispose(); _tray.Dispose(); }
         if (_ownsMutex) _mutex?.ReleaseMutex();

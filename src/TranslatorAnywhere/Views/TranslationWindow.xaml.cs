@@ -17,6 +17,7 @@ namespace TranslatorAnywhere.Views;
 
 public partial class TranslationWindow : Window
 {
+    public void DisposeRenderer() => ResultTextBox.Dispose();
     private readonly TranslationService _service;
     private readonly Func<AppSettings> _settings;
     private readonly Func<Guid, string> _apiKey;
@@ -39,6 +40,12 @@ public partial class TranslationWindow : Window
         _settings = settings;
         _apiKey = apiKey;
         InitializeComponent();
+        ResultTextBox.ActionRequested += action =>
+        {
+            if (action == "copy") Copy_Click(this, new RoutedEventArgs());
+            else if (action == "retry" && !_busy) Retry_Click(this, new RoutedEventArgs());
+            else if (action == "dismiss") { Cancel(); Hide(); }
+        };
         PinnedBox.IsChecked = settings().TranslationPinned;
     }
 
@@ -179,6 +186,7 @@ public partial class TranslationWindow : Window
         {
             if (ReferenceEquals(_requestCancellation, cancellation)) _requestCancellation = null;
             if (version == _requestVersion) SetBusy(false);
+            ResultTextBox.Flush();
             cancellation.Dispose();
         }
     }
@@ -201,6 +209,7 @@ public partial class TranslationWindow : Window
             SetStatus("已停止", false);
             if (ResultTextBox.Text.Length == 0) EmptyResultLabel.Text = "翻译已取消";
         }
+        ResultTextBox.Flush();
     }
 
     private void ShowConfigurationError(string message)
@@ -338,7 +347,8 @@ public partial class TranslationWindow : Window
             e.Handled = true;
             return;
         }
-        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C && ResultTextBox.SelectionLength == 0)
+        // Browser selections and its no-selection copy shortcut are handled by the local renderer.
+        if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C && !ResultTextBox.HasBrowserFocus && !ResultTextBox.HasSelection)
         {
             Copy_Click(sender, e);
             e.Handled = true;

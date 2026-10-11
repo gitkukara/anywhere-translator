@@ -78,7 +78,7 @@ internal static partial class Program
             Check(writes == 1 && theme.IsDark && store.Load().Theme == AppTheme.Dark, "Selecting dark mode autosaves and applies without restarting");
             Check(ThemeColor(window.Background) == ThemeResource("BackgroundBrush"), "An already open settings window changes its background");
             Check(ThemeColor(((TextBox)window.FindName("DelayBox")).Background) == ThemeResource("FieldBrush"), "Input fields follow dark mode");
-            Check(ThemeColor(((TextBox)translation.FindName("ResultTextBox")).Foreground) == ThemeResource("InkBrush"), "An already open translation adopts readable text");
+            Check(ThemeColor(((TranslationResultView)translation.FindName("ResultTextBox")).Foreground) == ThemeResource("InkBrush"), "An already open translation adopts readable text");
             Check(ThemeColor(((TextBlock)translation.FindName("RequestStatusLabel")).Foreground) == ThemeResource("MutedBrush"), "Programmatically assigned translation status follows theme changes");
             Check(ThemeColor(fixture.Background) == ThemeResource("BackgroundBrush"), "Selection test window uses the same palette");
             Check(Contrast(ThemeResource("InkBrush"), ThemeResource("FieldBrush")) >= 4.5 && Contrast(ThemeResource("MutedBrush"), ThemeResource("SurfaceBrush")) >= 4.5, "Dark mode normal and secondary text have readable contrast");

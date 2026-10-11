@@ -41,9 +41,10 @@
                 <ProgressBar x:Name="RequestProgress" Grid.Row="1" IsIndeterminate="True" Height="2" BorderThickness="0"
                              Foreground="{DynamicResource AccentBrush}" Background="Transparent" Visibility="Collapsed" />
                 <Grid Grid.Row="2" Margin="16,14,16,12" MinHeight="52">
-                    <TextBox x:Name="ResultTextBox" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                    <views:TranslationResultView x:Name="ResultTextBox"
                              MaxHeight="360" BorderThickness="0" Padding="0" Background="Transparent" FontSize="15"
-                             FontFamily="Microsoft YaHei UI, Segoe UI" TextBlock.LineHeight="24" VerticalContentAlignment="Top"
+                             Foreground="{DynamicResource InkBrush}"
+                             FontFamily="Microsoft YaHei UI, Segoe UI" TextBlock.LineHeight="24" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch"
                              AutomationProperties.Name="译文" />
                     <StackPanel x:Name="EmptyResultPanel" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,8">
                         <TextBlock x:Name="EmptyResultLabel" Text="准备翻译" FontSize="13" Foreground="{DynamicResource MutedBrush}" HorizontalAlignment="Center" />

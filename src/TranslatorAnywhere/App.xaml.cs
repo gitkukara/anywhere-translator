@@ -70,7 +70,6 @@ public partial class App : Application
                 MessageBox.Show(UiText.T("划词翻译已经在运行，请从任务栏托盘打开设置。"), "Anywhere Translator");
             Shutdown(); return;
         }
-        StartMenuRegistration.EnsureCurrentExecutable();
         _theme = new ThemeService(this);
         _theme.Apply(_settings.Theme);
         _theme.Changed += UpdateTrayTheme;

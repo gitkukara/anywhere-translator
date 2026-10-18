@@ -17,8 +17,13 @@ internal static class Program
     private static int assertions;
 
     [STAThread]
-    private static void Main()
+    private static void Main(string[] args)
     {
+        if (Array.IndexOf(args, "--distribution") >= 0)
+        {
+            DistributionChecks.Run();
+            return;
+        }
         string directory = Path.Combine(AppContext.BaseDirectory, "service-check-" + Guid.NewGuid().ToString("N"));
         Environment.SetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR", directory);
         try

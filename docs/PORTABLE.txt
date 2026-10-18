@@ -39,8 +39,11 @@ Anywhere Translator - Lightweight Portable / 轻量便携版
 更新、分享与移除
 - 更新前从托盘退出并备份 data；只替换 Anywhere Translator.exe，保留 data。
 - 分享给别人时使用原始 ZIP，不要把自己的 data 一起发出去。
-- 程序会自动创建或更新当前用户的开始菜单快捷方式。单文件组件可能解压到
-  系统临时目录；启用开机启动也会写入系统启动项。这不是完全无痕的便携模式。
+- v1.3.1 起，便携版不会自动创建开始菜单或桌面快捷方式，可自行创建。
+  旧版本已创建的快捷方式不会自动删除。单文件组件可能解压到系统临时目录；
+  用户主动启用开机启动时仍会写入启动项，因此不是完全无痕模式。
+- 不要将安装版的 installed-mode 文件复制到便携版目录。安装版使用
+  %LOCALAPPDATA%\AnywhereTranslator\data，两种版本的数据位置不同。
 - 移除前关闭开机启动并从托盘退出，随后删除程序文件夹；如有需要，在
   %APPDATA%\Microsoft\Windows\Start Menu\Programs 中删除 Anywhere Translator.lnk。
 
@@ -87,9 +90,12 @@ Moving to another folder or computer
 Updating, sharing, and removing
 - Exit from the tray and back up data before updating. Replace only the EXE and
   keep data. Share the original ZIP, never your personal data folder.
-- The app creates or updates a Start menu shortcut for the current user. Single-file
-  components may be extracted to the system temporary directory. Enabling startup
-  also creates a system startup entry. This is not a completely trace-free mode.
+- Since v1.3.1, Portable does not automatically create Start menu or desktop shortcuts.
+  Existing shortcuts from older versions are left alone. Single-file components may
+  be extracted to the system temporary directory. Explicitly enabling startup still
+  creates a startup entry. This is not a completely trace-free mode.
+- Do not copy the installed-mode marker from Setup into a portable folder. Setup uses
+  %LOCALAPPDATA%\AnywhereTranslator\data, a separate location from Portable.
 - To remove, disable startup, exit from the tray, and delete the app folder. If needed,
   delete Anywhere Translator.lnk from
   %APPDATA%\Microsoft\Windows\Start Menu\Programs.

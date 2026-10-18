@@ -1,0 +1,69 @@
+Anywhere Translator - Setup / 安装版
+
+中文说明
+========
+运行 Setup.exe，按向导完成安装。程序默认仅安装给当前 Windows 用户，
+位于 %LOCALAPPDATA%\Programs\Anywhere Translator，可在安装向导中更改目录。
+安装器创建开始菜单快捷方式，桌面快捷方式为可选项。
+
+运行环境：Windows x64；.NET 10 Desktop Runtime（x64）；WebView2 Evergreen Runtime。
+安装包不包含运行时。安装器会检测它们，缺失时提供微软官方下载按钮。
+在浏览器中下载并安装后，返回向导点击“Check again / 重新检测”。
+请下载 .NET Desktop Runtime 的 Windows x64 安装程序，而非普通 .NET Runtime。
+安装运行环境可能要求管理员权限；运行时已齐全时无需联网安装本程序。
+官方入口：
+https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+
+首次运行后，在“翻译服务”配置供应商、API Key 和模型。翻译需要联网。
+界面支持跟随系统、中文和 English，可在“外观 → 语言”即时切换。
+
+设置、密钥、导入图标和缓存保存在：
+%LOCALAPPDATA%\AnywhereTranslator\data
+人为设置 TRANSLATOR_ANYWHERE_DATA_DIR 环境变量时，以该变量为准。
+程序目录中的 installed-mode 文件用于识别安装版，请勿删除或移到便携版目录。
+
+更新：先从托盘退出程序，再运行新版 Setup.exe，保留原有数据。
+卸载：在 Windows“已安装的应用”中卸载。卸载会保留上述数据目录，方便重装。
+如果不再需要设置和密钥，可在退出程序并完成卸载后自行删除该数据目录。
+
+从便携版迁移：退出所有副本，备份数据，再将便携版 data 的内容复制到上述
+AppData 数据目录。已有安装版数据时先备份，避免覆盖。图标若仍引用旧目录，
+从复制后的 data\icons 重新导入。迁移后重新设置开机启动。
+跨电脑或更换 Windows 用户时，DPAPI 加密的 API Key 通常需要重新填写。
+安装版与便携版使用不同的数据位置，不要同时运行两个副本。
+
+English instructions
+====================
+Run Setup.exe. Installation is per-user, by default in:
+%LOCALAPPDATA%\Programs\Anywhere Translator
+Setup creates a Start menu shortcut and offers an optional desktop shortcut.
+
+Requirements: Windows x64, .NET 10 Desktop Runtime (x64), and WebView2 Evergreen
+Runtime. Neither runtime is bundled. Setup detects missing runtimes and provides
+official Microsoft download buttons. Install them in your browser, return to Setup,
+and click Check again. Select .NET Desktop Runtime for Windows x64, not the plain
+.NET Runtime. Runtime installation may require administrator permission.
+Setup can install the app offline when both runtimes are already installed.
+Official downloads:
+https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+
+Configure your translation provider, API key, and model after launch. Translation
+requires internet access. Change the interface language in Appearance > Language.
+
+Settings, keys, icons, and cache are saved in:
+%LOCALAPPDATA%\AnywhereTranslator\data
+A manually configured TRANSLATOR_ANYWHERE_DATA_DIR overrides this location.
+Keep the installed-mode marker in the program directory; do not copy it to a portable
+folder. Exit from the tray before upgrading, then run the new Setup.exe.
+
+Uninstall through Windows Installed apps. Your data is retained for reinstallation;
+delete the data directory yourself after uninstalling if you no longer need it.
+
+To migrate from Portable, exit all copies, back up your data, then copy the contents
+of the portable data folder to the AppData directory above. Back up any existing
+installed settings before replacing them. If icons still reference the old location,
+import them again from the copied data\icons folder. Reconfigure startup after moving.
+Re-enter API keys when changing PCs or Windows accounts because Windows DPAPI keys
+are normally tied to the original PC/account. Do not run both editions simultaneously.

@@ -35,10 +35,18 @@ public sealed class SettingsStore
 
     internal static string ResolveDataDirectory()
     {
-        string? overridePath = Environment.GetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR");
-        return Path.GetFullPath(string.IsNullOrWhiteSpace(overridePath)
-            ? Path.Combine(AppContext.BaseDirectory, "data")
-            : overridePath);
+        return ResolveDataDirectory(AppContext.BaseDirectory,
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Environment.GetEnvironmentVariable("TRANSLATOR_ANYWHERE_DATA_DIR"));
+    }
+
+    internal static string ResolveDataDirectory(string programDirectory, string localAppData, string? overridePath)
+    {
+        if (!string.IsNullOrWhiteSpace(overridePath)) return Path.GetFullPath(overridePath);
+        // Only Setup supplies this marker. A standalone EXE/ZIP remains portable.
+        return Path.GetFullPath(File.Exists(Path.Combine(programDirectory, "installed-mode"))
+            ? Path.Combine(localAppData, "AnywhereTranslator", "data")
+            : Path.Combine(programDirectory, "data"));
     }
 
     public AppSettings Load()

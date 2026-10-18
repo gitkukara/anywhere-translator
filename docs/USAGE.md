@@ -1,10 +1,10 @@
 # Anywhere Translator
 
-Windows 桌面划词翻译工具，当前源码和本地构建为 1.3.0，GitHub 下载版仍为 1.1.3。
+Windows 桌面划词翻译工具，当前版本为 1.3.1，提供 Setup 安装版和 Portable ZIP 便携版，两者都不内置 .NET。
 
 鼠标拖选或双击文字后，在选区旁显示按钮。点击按钮打开翻译窗口，并通过用户配置的 AI API 返回译文。程序独立运行，无需浏览器扩展。
 
-[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [v1.1.3 发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
+[下载最新版本](https://github.com/gitkukara/anywhere-translator/releases/latest) · [发布说明](../RELEASE_NOTES.md) · [GitHub 仓库](https://github.com/gitkukara/anywhere-translator)
 
 <img src="screenshots/appearance.png" alt="浅色外观设置" width="360" />
 
@@ -14,7 +14,9 @@ Windows 桌面划词翻译工具，当前源码和本地构建为 1.3.0，GitHub
 
 运行环境为 Windows x64。v1.2.5 起采用单文件 EXE，不内置 .NET；请安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)。公式排版还需要 Microsoft Edge WebView2 Runtime。已经安装运行时的电脑无需重复安装。
 
-当前本地构建生成 `Anywhere-Translator-v1.3.0-win-x64.exe`，无需解压或随附 DLL、脚本、字体。放到可写入的固定目录后运行；可改名为 `Anywhere Translator.exe`。程序在旁边的 `data` 文件夹保存配置，首次运行需配置 API 服务和密钥。运行 `Anywhere Translator.exe` 时会自动创建当前用户的开始菜单快捷方式；移动目录后再次运行即可更新入口。删除程序目录后，可在 `Win+R` 输入 `shell:programs`，删除对应快捷方式。[Releases](https://github.com/gitkukara/anywhere-translator/releases) 目前仍为 v1.1.3 旧版 ZIP，旧版需要完整解压并保留随附文件。
+推荐下载 `Anywhere-Translator-v1.3.1-win-x64-Setup.exe`：安装器检测运行环境，缺失时提供微软官方下载入口，安装后返回向导重新检测。安装器创建开始菜单快捷方式，可选桌面快捷方式；配置保存在 `%LOCALAPPDATA%\AnywhereTranslator\data`，通过 Windows“已安装的应用”卸载时保留数据。详见[安装版说明](INSTALL.txt)。
+
+也可下载 `Anywhere-Translator-v1.3.1-win-x64-portable.zip`，完整解压到可写入目录，运行 `Anywhere Translator.exe`。配置保存在旁边的 `data` 文件夹，不自动创建开始菜单或桌面快捷方式。首次运行需配置 API 服务和密钥；跨电脑通常需要重新填写密钥。旧版本创建的快捷方式不会自动删除，可在 `Win+R` 输入 `shell:programs` 后自行删除。详见[便携版说明](PORTABLE.txt)。
 
 GitHub 的 `Source code` 压缩包是源码，需要先构建才能运行；开发步骤见下方“开发与构建”。
 
@@ -113,7 +115,7 @@ UIA 失败时，全局快捷键可使用模拟复制降级。在“其他设置�
 
 ## 数据保存
 
-配置保存在程序所在目录的 `data/settings.json`。导入图标会复制到 `data/icons/`，删除原始图片不影响使用。
+便携版配置保存在程序旁的 `data/settings.json`；安装版保存在 `%LOCALAPPDATA%\AnywhereTranslator\data\settings.json`。导入图标会复制到对应的 `data/icons/`，删除原始图片不影响使用。
 
 每个供应商实例的 API Key 单独保存在 `data/api-key.<实例 ID>.dpapi`，由 Windows 当前用户加密，普通设置文件不包含密钥。复制到其他 Windows 账户或电脑后，应重新填写 Key。旧版首次升级会备份原设置文件，并将原 `api-key.dpapi` 密文迁移到对应实例；原有地址、模型及外观设置保持不变。
 
@@ -143,7 +145,9 @@ dotnet run --project tests/TranslatorAnywhere.UiChecks/TranslatorAnywhere.UiChec
 .\scripts\run.ps1
 ```
 
-默认打包输出为 `dist/Anywhere-Translator-v版本号-win-x64.exe`，并部署为 `dist/win-x64/Anywhere Translator.exe`。使用本机 .NET 10 Desktop Runtime，不内置运行时；渲染资源、SVG 依赖和许可内嵌在 EXE。首次构建可能需要联网恢复 NuGet 依赖。`-FrameworkDependent` 保留为兼容参数，与默认模式相同；`-SkipDeploy` 只生成 EXE，不覆盖本地运行目录。直接部署前应先退出程序，脚本会备份旧程序文件并保留 data。
+默认构建输出为 `dist/Anywhere-Translator-v版本号-win-x64.exe`，并部署为 `dist/win-x64/Anywhere Translator.exe`。使用本机 .NET 10 Desktop Runtime，不内置运行时；渲染资源、SVG 依赖和许可内嵌在 EXE。首次构建可能需要联网恢复 NuGet 依赖。`-FrameworkDependent` 保留为兼容参数，与默认模式相同；`-SkipDeploy` 只生成 EXE，不覆盖本地运行目录。直接部署前应先退出程序，脚本会备份旧程序文件并保留 data。
+
+对外发行时，继续运行 `scripts/package-portable.ps1` 生成 ZIP，运行 `scripts/package-setup.ps1 -CompilerPath "C:\path\to\ISCC.exe"` 生成 Setup（需要 Inno Setup 6）。两者都生成独立 SHA256 校验文件。
 
 仅验证单文件启动可运行 `scripts/check-single-file.ps1 -Executable dist/Anywhere-Translator-v版本号-win-x64.exe`；单文件发布界面检查程序后以 `--package` 运行，可验证内嵌公式、字体与 SVG，无需重复其他功能的回归检查。
 

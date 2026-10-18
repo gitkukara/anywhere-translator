@@ -1,0 +1,95 @@
+Anywhere Translator - Lightweight Portable / 轻量便携版
+
+中文说明
+========
+
+运行环境
+1. Windows x64 电脑，建议使用仍受支持的 Windows 11。
+2. 安装 Microsoft .NET 10 Desktop Runtime（Windows x64，最新 10.0.x 补丁）。
+   请在下载页选择“.NET Desktop Runtime”的 x64 安装程序。
+   仅安装普通 .NET Runtime、ASP.NET Core Runtime 或 .NET 8/9 不够；无需安装 SDK。
+   官方下载：https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+3. Markdown 和 LaTeX 公式排版需要 Microsoft Edge WebView2 Runtime。
+   缺失时安装 Evergreen Runtime；已有则无需重复安装。
+   官方下载：https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+   缺失或加载失败时，程序会回退显示源文本。
+4. 翻译需要联网，以及所选服务商的有效 API Key；可能产生服务商费用。
+   本 ZIP 不包含 .NET 或 WebView2 运行时，也不包含任何用户配置或密钥。
+
+首次使用
+1. 将 ZIP 完整解压到可写入的固定目录，例如 D:\Apps\AnywhereTranslator。
+   不要直接在压缩包内运行，也不要放在需要管理员权限写入的 Program Files 中。
+2. 双击 Anywhere Translator.exe。缺少 .NET 时，按系统提示前往上述下载页，
+   安装 .NET 10 Desktop Runtime（x64），然后重新启动程序。
+3. 程序默认在 EXE 旁自动创建 data 文件夹，用于设置、加密密钥、图标和缓存。
+   如果人为设置了 TRANSLATOR_ANYWHERE_DATA_DIR 环境变量，则使用该变量指定的目录。
+4. 在“翻译服务”中添加供应商、填写 API Key 并选择模型。
+   在“外观 → 语言”中选择跟随系统、English 或中文，立即生效。
+
+移动目录与跨电脑使用
+1. 先从系统托盘退出程序，再复制整个程序文件夹，包括 data。
+2. 目标电脑也需要上述运行环境。普通设置和导入图标随 data 一起保留。
+3. API Key 使用 Windows DPAPI 加密，通常绑定原电脑和原 Windows 用户。
+   换电脑、换 Windows 用户或重装系统后，请在每个服务商设置中重新填写密钥。
+   复制 .dpapi 文件无法保证密钥可用；请在自己的安全密码管理器中保留密钥。
+4. 在同一电脑、同一 Windows 用户下只移动目录，密钥通常仍可用。
+5. 若启用了开机静默启动，移动前先关闭，移动后在新位置运行并重新开启。
+   不要同时运行来自不同目录的多个副本。
+
+更新、分享与移除
+- 更新前从托盘退出并备份 data；只替换 Anywhere Translator.exe，保留 data。
+- 分享给别人时使用原始 ZIP，不要把自己的 data 一起发出去。
+- 程序会自动创建或更新当前用户的开始菜单快捷方式。单文件组件可能解压到
+  系统临时目录；启用开机启动也会写入系统启动项。这不是完全无痕的便携模式。
+- 移除前关闭开机启动并从托盘退出，随后删除程序文件夹；如有需要，在
+  %APPDATA%\Microsoft\Windows\Start Menu\Programs 中删除 Anywhere Translator.lnk。
+
+English instructions
+====================
+
+Requirements
+1. A Windows x64 PC. A supported Windows 11 installation is recommended.
+2. Microsoft .NET 10 Desktop Runtime for Windows x64, with the latest 10.0.x patch.
+   Select the x64 installer under ".NET Desktop Runtime" on the download page.
+   The plain .NET Runtime, ASP.NET Core Runtime, or .NET 8/9 alone is insufficient.
+   You do not need the SDK.
+   Official download: https://dotnet.microsoft.com/en-us/download/dotnet/10.0
+3. Microsoft Edge WebView2 Runtime is needed for Markdown and LaTeX rendering.
+   Install the Evergreen Runtime if it is missing. Rendering falls back to source
+   text if WebView2 is unavailable or fails to load.
+   Official download: https://developer.microsoft.com/en-us/microsoft-edge/webview2/
+4. Translation requires internet access and a valid API key for your provider.
+   Provider charges may apply. This ZIP includes neither runtime nor personal data.
+
+Getting started
+1. Extract the entire ZIP to a writable folder, such as D:\Apps\AnywhereTranslator.
+   Do not run inside the ZIP or place the app in a protected Program Files folder.
+2. Run Anywhere Translator.exe. If .NET is missing, install .NET 10 Desktop Runtime
+   (x64) from the official page above, then start the app again.
+3. The app creates a data folder beside the EXE for settings, encrypted API keys,
+   icons, and cache. A manually configured TRANSLATOR_ANYWHERE_DATA_DIR environment
+   variable overrides this default location.
+4. Add your provider, API key, and model in Translation. Switch the interface in
+   Appearance > Language; the change takes effect immediately.
+
+Moving to another folder or computer
+1. Exit from the system tray before copying the entire folder, including data.
+2. Install the required runtimes on the destination PC. Settings and imported icons
+   travel with the data folder.
+3. API keys use Windows DPAPI encryption and are normally tied to the original PC
+   and Windows account. Re-enter each provider's key after changing computers,
+   Windows accounts, or reinstalling Windows. Copying .dpapi files does not guarantee
+   access to the keys. Keep your keys in your own secure password manager.
+4. Moving folders on the same PC under the same Windows account normally preserves
+   access to the keys. If startup is enabled, disable it before moving, then enable
+   it again from the new location. Do not run multiple copies from different folders.
+
+Updating, sharing, and removing
+- Exit from the tray and back up data before updating. Replace only the EXE and
+  keep data. Share the original ZIP, never your personal data folder.
+- The app creates or updates a Start menu shortcut for the current user. Single-file
+  components may be extracted to the system temporary directory. Enabling startup
+  also creates a system startup entry. This is not a completely trace-free mode.
+- To remove, disable startup, exit from the tray, and delete the app folder. If needed,
+  delete Anywhere Translator.lnk from
+  %APPDATA%\Microsoft\Windows\Start Menu\Programs.

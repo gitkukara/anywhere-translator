@@ -22,6 +22,8 @@ English UI is available in **Appearance → Language → English**. System mode 
 
 ## 使用
 
+轻量 Portable ZIP：运行 `pwsh -File scripts/package-portable.ps1` 可将已构建的当前版本 EXE 打包为 `dist/Anywhere-Translator-v1.3.0-win-x64-portable.zip`，不内置 .NET 或 WebView2。完整解压后运行，首次启动自动生成 `data`。包内附中英文 [便携版说明](docs/PORTABLE.txt)，包含运行环境下载、更新与跨电脑迁移步骤；跨电脑或 Windows 用户通常需要重新填写 API Key。此脚本不会重新编译或改动本地使用中的程序；如尚无 EXE，先运行 `pwsh -File scripts/build.ps1 -SkipDeploy`。
+
 1. 安装 [.NET 10 Desktop Runtime（x64）](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) 和 Microsoft Edge WebView2 Runtime，然后运行 Windows x64 单文件 EXE。已有运行时的电脑无需重复安装。
    本地生成的下载文件名为 `Anywhere-Translator-v1.3.0-win-x64.exe`，可改名为 `Anywhere Translator.exe` 后放到可写入的固定目录；旧版 v1.1.3 下载仍需完整解压。
    首次运行会自动添加开始菜单快捷方式，可搜索 `Anywhere Translator`；移动目录后再次运行即可更新入口。

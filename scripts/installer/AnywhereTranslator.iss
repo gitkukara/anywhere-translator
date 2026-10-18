@@ -146,7 +146,7 @@ end;
 function NextButtonClick(CurPageID: Integer): Boolean;
 begin
   Result := True;
-  if CurPageID = RuntimePage.ID then begin
+  if (CurPageID = RuntimePage.ID) and not WizardSilent then begin
     RefreshRuntimes(nil);
     Result := MissingRuntimes = '';
     if not Result then MsgBox('Install the missing runtimes, then check again.' + #13#10 +

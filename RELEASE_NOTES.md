@@ -7,7 +7,9 @@
 - 界面语言与翻译目标语言独立；切换时保留模型、API 配置、用户命名和自定义按钮文字。
 - 英文布局适配最小窗口宽度，并保留单文件 EXE 发布方式。
 
-仅进行语言切换、保存、布局和渲染提示的针对性检查。本版本提供本地构建，尚未发布 GitHub Release。
+提供轻量 Windows x64 Portable ZIP（约 8.21 MiB），不内置 .NET 或 WebView2，附中英文运行环境与跨电脑迁移说明、许可证和独立 SHA256 校验文件。运行需要 .NET 10 Desktop Runtime（x64）；Markdown 与公式排版需要 WebView2 Runtime。跨电脑或 Windows 用户通常需要重新填写 API Key。
+
+仅进行语言切换、保存、布局和渲染提示的针对性检查，并校验便携包与现有 v1.3.0 EXE 一致。
 
 # v1.2.5
 
